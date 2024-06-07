@@ -1,3 +1,5 @@
+// Colors.js
+
 export const Colors = {
   dark: {
     text: "#FFFFFF", // White
@@ -7,6 +9,8 @@ export const Colors = {
     tabIconDefault: "#757575", // Gray
     tabIconSelected: "#03DAC5", // Cyan
     inactive: "#424242", // Dark Gray
+    primary: "#03DAC5", // Cyan
+    border: "#757575", // Gray
   },
   light: {
     text: "#000000", // Black
@@ -16,5 +20,7 @@ export const Colors = {
     tabIconDefault: "#9E9E9E", // Gray
     tabIconSelected: "#FF4081", // Pink
     inactive: "#B0BEC5", // Blue Gray
+    primary: "#FF4081", // Pink
+    border: "#9E9E9E", // Gray
   },
 };
