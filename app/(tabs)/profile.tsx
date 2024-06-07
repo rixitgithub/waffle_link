@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -100,6 +101,14 @@ const ProfileScreen = () => {
         </View>
         {/* Add more reward items as needed */}
       </View>
+
+      {/* Create Account Button */}
+      <TouchableOpacity
+        style={styles.createAccountButton}
+        onPress={() => navigation.navigate("CreateAccount")}
+      >
+        <FontAwesome name="user-plus" size={24} color="black" />
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -144,6 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#007bff",
     padding: 10,
     borderRadius: 5,
+    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",
@@ -168,6 +178,11 @@ const styles = StyleSheet.create({
   rewardDescription: {
     fontSize: 14,
     color: "#666",
+  },
+  createAccountButton: {
+    position: "absolute",
+    top: 30,
+    right: 10,
   },
 });
 
