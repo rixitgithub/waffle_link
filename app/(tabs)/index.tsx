@@ -5,16 +5,16 @@ import {
   FlatList,
   Image,
   Text,
-  Pressable,
   StyleSheet,
   Dimensions,
+  Pressable,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Banner from "../banner";
 import { FontAwesome } from "@expo/vector-icons";
+import Swiper from "react-native-swiper";
 
 const { width } = Dimensions.get("window");
 
@@ -23,7 +23,7 @@ interface Post {
   userImage: string;
   userName: string;
   postText: string;
-  postImage: string;
+  postImages: string[]; // Updated interface to include multiple post images
   views: number;
   likes: number;
   comments: number;
@@ -35,7 +35,11 @@ const dummyData: Post[] = [
     userImage: "https://via.placeholder.com/40",
     userName: "User One",
     postText: "Loving this view!",
-    postImage: "https://via.placeholder.com/600x400",
+    postImages: [
+      "https://via.placeholder.com/700x400",
+      "https://via.placeholder.com/600x400",
+      "https://via.placeholder.com/600x400",
+    ],
     views: 120,
     likes: 30,
     comments: 10,
@@ -45,7 +49,7 @@ const dummyData: Post[] = [
     userImage: "https://via.placeholder.com/40",
     userName: "User Two",
     postText: "Amazing sunset today.",
-    postImage: "https://via.placeholder.com/600x400",
+    postImages: ["https://via.placeholder.com/600x400"],
     views: 80,
     likes: 25,
     comments: 5,
@@ -53,7 +57,6 @@ const dummyData: Post[] = [
 ];
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -78,9 +81,15 @@ const HomeScreen: React.FC = () => {
       <Text style={[styles.postText, { color: colors.text }]}>
         {item.postText}
       </Text>
-      <Pressable onPress={() => openImageModal(item.postImage)}>
-        <Image source={{ uri: item.postImage }} style={styles.postImage} />
-      </Pressable>
+      <Swiper style={styles.swiper}>
+        {item.postImages.map((image, index) => (
+          <View key={index}>
+            <Pressable onPress={() => openImageModal(image)}>
+              <Image source={{ uri: image }} style={styles.postImage} />
+            </Pressable>
+          </View>
+        ))}
+      </Swiper>
       <View style={styles.postStats}>
         <View style={styles.statsLeft}>
           <FontAwesome
@@ -103,7 +112,6 @@ const HomeScreen: React.FC = () => {
             name="comment"
             size={20}
             style={[styles.statIcon, { color: colors.inactive }]}
-            onPress={() => navigation.navigate("comments", { postId: item.id })}
           />
           <Text style={[styles.statText, { color: colors.inactive }]}>
             {item.comments}
@@ -160,7 +168,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-
   userImage: {
     width: 40,
     height: 40,
@@ -212,6 +219,9 @@ const styles = StyleSheet.create({
   modalImage: {
     width: width * 0.9,
     height: width * 0.9,
+  },
+  swiper: {
+    height: 200,
   },
 });
 
