@@ -15,7 +15,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import Banner from "../banner";
 import { FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
-
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
 const { width } = Dimensions.get("window");
 
 interface Post {
@@ -60,19 +60,29 @@ const HomeScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
   };
 
+  const openUserDetails = (userId: string) => {
+    navigation.navigate("UserDetailsScreen", { userId });
+  };
+
   const renderItem = ({ item }: { item: Post }) => (
     <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
       <View style={styles.userContainer}>
-        <Image source={{ uri: item.userImage }} style={styles.userImage} />
-        <View>
+        <Pressable onPress={() => openUserDetails(item.id)}>
+          <Image source={{ uri: item.userImage }} style={styles.userImage} />
+        </Pressable>
+
+        <Pressable onPress={() => openUserDetails(item.id)}>
           <Text style={[styles.userName, { color: colors.text }]}>
             {item.userName}
           </Text>
+        </Pressable>
+        <View>
           <Text style={[styles.timeAgo, { color: colors.inactive }]}>
             3 days ago
           </Text>
