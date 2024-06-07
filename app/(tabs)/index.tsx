@@ -1,20 +1,23 @@
+// HomeScreen.tsx
 import React, { useState } from "react";
 import {
   View,
-  Text,
   FlatList,
   Image,
+  Text,
   Pressable,
   StyleSheet,
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome } from "@expo/vector-icons";
 import Modal from "react-native-modal";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import Banner from "../banner";
+import { FontAwesome } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
-// Sample Post type and dummyData
 interface Post {
   id: string;
   userImage: string;
@@ -47,11 +50,12 @@ const dummyData: Post[] = [
     likes: 25,
     comments: 5,
   },
-  // Add more dummy posts if needed
 ];
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const openImageModal = (imageUrl: string) => {
@@ -59,39 +63,64 @@ const HomeScreen: React.FC = () => {
   };
 
   const renderItem = ({ item }: { item: Post }) => (
-    <View style={styles.postContainer}>
+    <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
       <View style={styles.userContainer}>
         <Image source={{ uri: item.userImage }} style={styles.userImage} />
         <View>
-          <Text style={styles.userName}>{item.userName}</Text>
-          <Text style={styles.timeAgo}>3 days ago</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>
+            {item.userName}
+          </Text>
+          <Text style={[styles.timeAgo, { color: colors.inactive }]}>
+            3 days ago
+          </Text>
         </View>
       </View>
-      <Text style={styles.postText}>{item.postText}</Text>
+      <Text style={[styles.postText, { color: colors.text }]}>
+        {item.postText}
+      </Text>
       <Pressable onPress={() => openImageModal(item.postImage)}>
         <Image source={{ uri: item.postImage }} style={styles.postImage} />
       </Pressable>
       <View style={styles.postStats}>
         <View style={styles.statsLeft}>
-          <FontAwesome name="eye" size={20} style={styles.statIcon} />
-          <Text style={styles.statText}>{item.views}</Text>
-          <FontAwesome name="heart" size={20} style={styles.statIcon} />
-          <Text style={styles.statText}>{item.likes}</Text>
+          <FontAwesome
+            name="eye"
+            size={20}
+            style={[styles.statIcon, { color: colors.inactive }]}
+          />
+          <Text style={[styles.statText, { color: colors.inactive }]}>
+            {item.views}
+          </Text>
+          <FontAwesome
+            name="heart"
+            size={20}
+            style={[styles.statIcon, { color: colors.inactive }]}
+          />
+          <Text style={[styles.statText, { color: colors.inactive }]}>
+            {item.likes}
+          </Text>
           <FontAwesome
             name="comment"
             size={20}
-            style={styles.statIcon}
+            style={[styles.statIcon, { color: colors.inactive }]}
             onPress={() => navigation.navigate("comments", { postId: item.id })}
           />
-          <Text style={styles.statText}>{item.comments}</Text>
+          <Text style={[styles.statText, { color: colors.inactive }]}>
+            {item.comments}
+          </Text>
         </View>
-        <FontAwesome name="share" size={20} style={styles.shareIcon} />
+        <FontAwesome
+          name="share"
+          size={20}
+          style={[styles.shareIcon, { color: colors.inactive }]}
+        />
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Banner />
       <FlatList
         data={dummyData}
         renderItem={renderItem}
@@ -117,27 +146,21 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E0F7FA", // Light Blue background
   },
   feedContainer: {
     padding: 10,
   },
   postContainer: {
     marginBottom: 20,
-    backgroundColor: "#FFFFFF", // White background
     borderRadius: 10,
     padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
   },
   userContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
+
   userImage: {
     width: 40,
     height: 40,
@@ -147,16 +170,16 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#37474F", // Deep Green text color
+    color: Colors.text,
   },
   timeAgo: {
     fontSize: 12,
-    color: "gray",
+    color: Colors.inactive,
   },
   postText: {
     fontSize: 14,
     marginBottom: 10,
-    color: "#37474F", // Deep Green text color
+    color: Colors.text,
   },
   postImage: {
     width: "100%",
@@ -175,16 +198,12 @@ const styles = StyleSheet.create({
   },
   statIcon: {
     marginRight: 5,
-    color: "gray",
   },
   statText: {
     marginRight: 15,
     fontSize: 14,
-    color: "gray",
   },
-  shareIcon: {
-    color: "gray",
-  },
+  shareIcon: {},
   modalContent: {
     flex: 1,
     justifyContent: "center",
@@ -195,3 +214,5 @@ const styles = StyleSheet.create({
     height: width * 0.9,
   },
 });
+
+export default HomeScreen;
