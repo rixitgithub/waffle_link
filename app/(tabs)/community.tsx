@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useNavigation } from "@react-navigation/native";
 
 // Mock data for communities (replace with actual data)
 const mockCommunities = [
@@ -60,6 +61,7 @@ const categories = [
 const CommunityScreen = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [selectedCategory, setSelectedCategory] = useState("all"); // State for selected category
   const [communities, setCommunities] = useState([]); // State for communities
@@ -89,6 +91,11 @@ const CommunityScreen = () => {
   useEffect(() => {
     handleSearch();
   }, [selectedCategory]);
+
+  const handleCommunityPress = (userId) => {
+    // Navigate to the user details screen and pass the community id as a parameter
+    navigation.navigate("UserDetailsScreen", { userId });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -162,7 +169,7 @@ const CommunityScreen = () => {
                   borderColor: colors.border,
                 },
               ]}
-              onPress={() => console.log("Community selected:", item)}
+              onPress={() => handleCommunityPress(item.id)}
             >
               <Image
                 source={{ uri: item.image }}
