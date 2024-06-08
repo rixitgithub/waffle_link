@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import useUserAPI from "../api/user.js";
+import useUserAPI from "../api/auth.js";
 
 const CreateAccountScreen = () => {
   const [username, setUsername] = useState("");
@@ -74,6 +74,12 @@ const CreateAccountScreen = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate("Login")}
+      >
+        <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Create Account</Text>
       <TouchableOpacity onPress={handlePickImage}>
         {profilePicture ? (
@@ -141,6 +147,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+  },
+  loginButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    padding: 10,
+    backgroundColor: "transparent",
+  },
+  loginButtonText: {
+    fontSize: 16,
+    color: "blue",
   },
   title: {
     fontSize: 24,

@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import useUserAPI from "../api/user.js";
+import useUserAPI from "../api/auth.js";
 import {
   View,
   Text,

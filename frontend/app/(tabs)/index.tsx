@@ -1,5 +1,5 @@
 // HomeScreen.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   FlatList,
@@ -12,6 +12,7 @@ import {
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useFocusEffect } from "@react-navigation/native";
 import Banner from "../banner";
 import { FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
@@ -62,6 +63,16 @@ const HomeScreen: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigation = useNavigation();
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshPage = async () => {
+        // Your refresh logic here
+        console.log("HomeScreen refreshed");
+      };
+      refreshPage();
+    }, [])
+  );
+
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
   };
@@ -84,7 +95,7 @@ const HomeScreen: React.FC = () => {
         </Pressable>
         <View>
           <Text style={[styles.timeAgo, { color: colors.inactive }]}>
-            3 days ago
+            99 days ago
           </Text>
         </View>
       </View>
