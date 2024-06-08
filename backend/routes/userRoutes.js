@@ -9,13 +9,15 @@ const User = require("../models/User.js");
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     // Extract user profile information from req.user
-    const { username, email, profilePicture, location, website } = req.user;
+    const { username, email, profilePicture, location, website, bio } =
+      req.user;
     return res.status(200).json({
       username,
       email,
       profilePicture,
       location,
       website,
+      bio,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

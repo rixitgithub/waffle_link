@@ -10,43 +10,54 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
+import { fetchUserProfile } from "../../api/user.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null); // State to hold user data
-  const [loading, setLoading] = useState(true); // State to track loading status
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
-  // Function to fetch user data
-  const fetchUserData = async () => {
-    // Replace this with actual API call to fetch user data
-    try {
-      // Simulate API call with setTimeout
-      setTimeout(() => {
-        const mockUserData = {
-          name: "John Doe",
-          email: "johndoe@example.com",
-          bio: "Passionate about making a positive impact in the world.",
-          profilePicture: "https://via.placeholder.com/150",
-          activitySummary: {
-            posts: 10,
-            connections: 50,
-            followers: 100,
-          },
-          // Add more user data fields as needed
-        };
-        setUserData(mockUserData);
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setLoading(false);
-    }
-  };
-
-  // Fetch user data when component mounts
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await fetchUserProfile(); // Call the fetchUserDetails function
+        console.log("checking", userData);
+        setLoading(false);
+        setUserData(userData);
+        if (userData != null) {
+          setAuthenticated(true); // Set authenticated to true if user data is fetched successfully
+        } else {
+          setAuthenticated(false);
+        }
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+        // Check if the error is due to JWT expiration
+        if (error.response && error.response.status === 401) {
+          // Remove the token from AsyncStorage
+          await AsyncStorage.removeItem("token");
+          // Redirect to the login screen or perform any other action
+          navigation.navigate("Login");
+        }
+      }
+    };
+
     fetchUserData();
   }, []);
+
+  // Logout function
+  const logout = async () => {
+    try {
+      // Remove the token from AsyncStorage
+      await AsyncStorage.removeItem("token");
+      // Redirect to the login screen
+      navigation.navigate("Login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   // Render loading indicator if data is still loading
   if (loading) {
@@ -57,65 +68,87 @@ const ProfileScreen = () => {
     );
   }
 
-  // Render user profile once data is fetched
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Profile Picture */}
-      <Image
-        source={{ uri: userData.profilePicture }}
-        style={styles.profilePicture}
-      />
+  // Render user profile once data is fetched and user is authenticated
+  if (authenticated) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Profile Picture */}
+        <Image
+          source={{ uri: userData?.profilePicture || "jiojio" }}
+          style={styles.profilePicture}
+        />
 
-      {/* User Information */}
-      <View style={styles.userInfoContainer}>
-        <Text style={styles.userName}>{userData.name}</Text>
-        <Text style={styles.userEmail}>{userData.email}</Text>
-        <Text style={styles.userBio}>{userData.bio}</Text>
-      </View>
-
-      {/* Activity Summary */}
-      <View style={styles.activitySummaryContainer}>
-        <Text>Posts: {userData.activitySummary.posts}</Text>
-        <Text>Connections: {userData.activitySummary.connections}</Text>
-        <Text>Followers: {userData.activitySummary.followers}</Text>
-      </View>
-
-      {/* Edit Profile Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("EditProfile")}
-      >
-        <Text style={styles.buttonText}>Edit Profile</Text>
-      </TouchableOpacity>
-
-      {/* Rewards Section */}
-      <View style={styles.rewardsSection}>
-        <Text style={styles.sectionTitle}>Rewards</Text>
-        <View style={styles.rewardItem}>
-          <Text style={styles.rewardName}>Reward 1</Text>
-          <Text style={styles.rewardDescription}>Description of Reward 1</Text>
+        {/* User Information */}
+        <View style={styles.userInfoContainer}>
+          <Text style={styles.userName}>{userData?.username || "Unknown"}</Text>
+          <Text style={styles.userEmail}>{userData?.email || "Unknown"}</Text>
+          <Text style={styles.userBio}>
+            {userData?.bio || "No bio available"}
+          </Text>
         </View>
-        <View style={styles.rewardItem}>
-          <Text style={styles.rewardName}>Reward 2</Text>
-          <Text style={styles.rewardDescription}>Description of Reward 2</Text>
-        </View>
-        {/* Add more reward items as needed */}
-      </View>
 
-      {/* Create Account Button */}
-      <TouchableOpacity
-        style={styles.createAccountButton}
-        onPress={() => navigation.navigate("CreateAccount")}
-      >
-        <FontAwesome name="user-plus" size={24} color="black" />
-      </TouchableOpacity>
-    </ScrollView>
-  );
+        {/* Activity Summary */}
+        <View style={styles.activitySummaryContainer}>
+          <Text style={styles.activitySummaryTitle}>Activity Summary</Text>
+          <View style={styles.activitySummaryItem}>
+            <FontAwesome name="file-text-o" size={20} color="#007bff" />
+            <Text style={styles.activitySummaryText}>
+              Posts: {userData?.activitySummary?.posts || 0}
+            </Text>
+          </View>
+          <View style={styles.activitySummaryItem}>
+            <FontAwesome name="users" size={20} color="#007bff" />
+            <Text style={styles.activitySummaryText}>
+              Connections: {userData?.activitySummary?.connections || 0}
+            </Text>
+          </View>
+          <View style={styles.activitySummaryItem}>
+            <FontAwesome name="heart" size={20} color="#007bff" />
+            <Text style={styles.activitySummaryText}>
+              Followers: {userData?.activitySummary?.followers || 0}
+            </Text>
+          </View>
+        </View>
+
+        {/* Edit Profile Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("EditProfile")}
+        >
+          <Text style={styles.buttonText}>Edit Profile</Text>
+        </TouchableOpacity>
+
+        {/* Rewards Section */}
+        <View style={styles.rewardsSection}>
+          <Text style={styles.sectionTitle}>Rewards</Text>
+          {/* Render reward items here */}
+        </View>
+
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <FontAwesome name="sign-out" size={24} color="black" />
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  } else {
+    // Render create account button if user is not authenticated
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.createAccountButton}
+          onPress={() => navigation.navigate("CreateAccount")}
+        >
+          <Text style={styles.createAccountButtonText}>Create Account</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 50,
+    paddingVertical: 70,
+    paddingHorizontal: 30,
     alignItems: "center",
   },
   loadingContainer: {
@@ -131,6 +164,7 @@ const styles = StyleSheet.create({
   },
   userInfoContainer: {
     marginBottom: 20,
+    alignItems: "center",
   },
   userName: {
     fontSize: 24,
@@ -148,10 +182,25 @@ const styles = StyleSheet.create({
   },
   activitySummaryContainer: {
     marginBottom: 20,
+    alignItems: "center",
+  },
+  activitySummaryTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  activitySummaryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  activitySummaryText: {
+    marginLeft: 10,
   },
   button: {
     backgroundColor: "#007bff",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
     marginBottom: 20,
   },
@@ -179,10 +228,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
+  logoutButton: {
+    position: "absolute",
+    top: 30,
+    left: 10,
+  },
   createAccountButton: {
     position: "absolute",
     top: 30,
     right: 10,
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  createAccountButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
