@@ -69,7 +69,7 @@ const ngoSchema = new Schema({
   ],
   profilePhoto: {
     type: String,
-    default: "defaultProfilePhotoUrl", // Replace with your default URL or leave it empty
+    default: "", // Replace with your default URL or leave it empty
   },
   posts: [
     {
