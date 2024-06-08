@@ -23,14 +23,11 @@ const useUserAPI = () => {
   };
 
   const login = (userData) => {
-    console.log({ userData }); // Log to indicate data being sent
+    // Log to indicate data being sent
     return axios
       .post(`${API_URL}/api/users/login`, userData)
       .then((response) => {
-        console.log(response.data); // Log the response data
-        localStorage.setItem("token", response.data.token);
-
-        return response.data;
+        return response;
       })
       .catch((error) => {
         console.error(error.response?.data?.message || "Something went wrong"); // Log the error message
