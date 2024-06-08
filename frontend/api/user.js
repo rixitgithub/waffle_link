@@ -6,7 +6,7 @@ const API_URL = "http://10.0.2.2:4000";
 
 const useUserAPI = () => {
   const register = (userData) => {
-    console.log(`${API_URL}/api/users`); // Log to indicate data being sent
+    console.log(userData); // Log to indicate data being sent
     return axios
       .post(`${API_URL}/api/users`, userData)
       .then((response) => {

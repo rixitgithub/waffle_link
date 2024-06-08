@@ -23,14 +23,33 @@ mongoose
   .catch((err) => console.log("MongoDB connection error: ", err));
 
 // Register a new user
+// Register a new user
 app.post("/api/users", async (req, res) => {
-  console.log("hoi");
   try {
-    const { username, email, password } = req.body;
+    console.log("hello");
+    const {
+      username,
+      email,
+      password,
+      name,
+      bio,
+      profilePicture,
+      location,
+      website,
+    } = req.body;
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
     // Create a new user
-    const user = new User({ username, email, password: hashedPassword });
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      name,
+      bio,
+      profilePicture,
+      location,
+      website,
+    });
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
