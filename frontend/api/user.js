@@ -8,7 +8,7 @@ const useUserAPI = () => {
   const register = (userData) => {
     console.log(userData); // Log to indicate data being sent
     return axios
-      .post(`${API_URL}/api/users`, userData)
+      .post(`${API_URL}/api/users/register`, userData)
       .then((response) => {
         console.log(response.data); // Log the response data
 
