@@ -134,11 +134,20 @@ const ProfileScreen = () => {
     // Render create account button if user is not authenticated
     return (
       <View style={styles.container}>
+        {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
           onPress={() => navigation.navigate("CreateAccount")}
         >
           <Text style={styles.createAccountButtonText}>Create Account</Text>
+        </TouchableOpacity>
+
+        {/* Create NGO Button */}
+        <TouchableOpacity
+          style={styles.createNgoButton}
+          onPress={() => navigation.navigate("CreateNGO")}
+        >
+          <Text style={styles.createNgoButtonText}>Create NGO</Text>
         </TouchableOpacity>
       </View>
     );
@@ -234,15 +243,29 @@ const styles = StyleSheet.create({
     left: 10,
   },
   createAccountButton: {
-    position: "absolute",
-    top: 30,
-    right: 10,
     backgroundColor: "#007bff",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
     borderRadius: 5,
+    marginBottom: 20,
+    alignItems: "center",
   },
+
   createAccountButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  createNgoButton: {
+    backgroundColor: "#28a745",
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+
+  createNgoButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },
