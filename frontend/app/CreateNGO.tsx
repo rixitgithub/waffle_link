@@ -8,9 +8,11 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import ProgressCircle from "react-native-progress/Circle";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { submitNGOForm } from "../api/ngo.js"; // Import the API function
 
 const { width } = Dimensions.get("window");
 
@@ -106,10 +108,7 @@ const NGOFormScreen = ({ navigation }) => {
       }).start();
       setCurrentStep(currentStep + 1);
     } else {
-      console.log("Form Data:", formData);
-      setFormData({});
-      setCurrentStep(0);
-      position.setValue(0);
+      handleSubmit();
     }
   };
 
@@ -135,6 +134,22 @@ const NGOFormScreen = ({ navigation }) => {
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await submitNGOForm(formData);
+      console.log("Form submitted successfully:", response);
+      Alert.alert("Success", "NGO Form submitted successfully!");
+      setFormData({});
+      setCurrentStep(0);
+      position.setValue(0);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "There was an error submitting the form. Please try again."
+      );
+    }
   };
 
   const progress = (currentStep + 1) / steps.length;
@@ -247,7 +262,6 @@ const NGOFormScreen = ({ navigation }) => {
                 }}
               />
             )}
-
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <Text>Select Date</Text>
             </TouchableOpacity>
