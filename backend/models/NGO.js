@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const ngoSchema = new Schema({
+  owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   profilePhoto: String,
   name: { type: String, required: true },
   establishedDate: Date,
