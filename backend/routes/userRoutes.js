@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware"); // Adjust the path as necessary
-const NGO = require("../models/ngoModel"); // Adjust the path as necessary
+const NGO = require("../models/NGO"); // Adjust the path as necessary
 
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
