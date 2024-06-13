@@ -30,3 +30,21 @@ export const submitNGOForm = async (formData) => {
     throw error;
   }
 };
+export const fetchNGODetails = async () => {
+  try {
+    // Retrieve token from AsyncStorage
+    const token = await AsyncStorage.getItem("token");
+
+    // Fetch NGO details using Axios directly
+    const response = await axios.get(`${API_URL}/api/ngo/details`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching NGO details:", error);
+    throw error;
+  }
+};

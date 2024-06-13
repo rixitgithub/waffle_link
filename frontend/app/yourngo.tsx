@@ -1,58 +1,114 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { fetchNGODetails } from "../api/ngo"; // Adjust the path as needed
+
+type NGO = {
+  profilePhoto: string;
+  name: string;
+  missionStatement: string;
+  contactInfo: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  founders: {
+    image: string;
+    name: string;
+    position: string;
+  }[];
+};
 
 export default function YourNGO() {
-  // Hardcoded NGO data
-  const ngo = {
-    profilePhoto: "https://example.com/profile-photo.jpg",
-    name: "Sample NGO",
-    missionStatement: "To make the world a better place.",
-    contactInfo: "contact@samplengo.org",
-    address: {
-      street: "123 Main St",
-      city: "Anytown",
-      state: "Anystate",
-      postalCode: "12345",
-      country: "Country",
-    },
-    founders: [
-      {
-        image: "https://example.com/founder1.jpg",
-        name: "John Doe",
-        position: "Founder",
-      },
-      {
-        image: "https://example.com/founder2.jpg",
-        name: "Jane Smith",
-        position: "Co-Founder",
-      },
-    ],
-  };
+  const [ngo, setNGO] = useState<NGO | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getNGODetails = async () => {
+      try {
+        const data = await fetchNGODetails();
+        console.log("this is the ngo", data);
+        setNGO(data);
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getNGODetails();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Error fetching NGO details. Please try again later.
+        </Text>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (!ngo) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>No NGO details available.</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={{ uri: ngo.profilePhoto }} style={styles.profilePhoto} />
-      <Text style={styles.name}>{ngo.name}</Text>
-      <Text style={styles.missionStatement}>{ngo.missionStatement}</Text>
+      {ngo.profilePhoto && (
+        <Image source={{ uri: ngo.profilePhoto }} style={styles.profilePhoto} />
+      )}
+      {ngo.name && <Text style={styles.name}>{ngo.name}</Text>}
+      {ngo.missionStatement && (
+        <Text style={styles.missionStatement}>{ngo.missionStatement}</Text>
+      )}
       <Text style={styles.heading}>Contact Information:</Text>
-      <Text>{ngo.contactInfo}</Text>
+      {ngo.contactInfo && <Text>{ngo.contactInfo}</Text>}
       <Text style={styles.heading}>Address:</Text>
-      <Text>{`${ngo.address.street}, ${ngo.address.city}, ${ngo.address.state}, ${ngo.address.postalCode}, ${ngo.address.country}`}</Text>
+      {ngo.address && (
+        <Text>{`${ngo.address.street}, ${ngo.address.city}, ${ngo.address.state}, ${ngo.address.postalCode}, ${ngo.address.country}`}</Text>
+      )}
       <Text style={styles.heading}>Founders:</Text>
-      {ngo.founders.map((founder, index) => (
-        <View key={index} style={styles.founder}>
-          {founder.image && (
-            <Image
-              source={{ uri: founder.image }}
-              style={styles.founderImage}
-            />
-          )}
-          <View>
-            <Text style={styles.founderName}>{founder.name}</Text>
-            <Text>{founder.position}</Text>
+      {ngo.founders &&
+        ngo.founders.map((founder, index) => (
+          <View key={index} style={styles.founder}>
+            {founder.image && (
+              <Image
+                source={{ uri: founder.image }}
+                style={styles.founderImage}
+              />
+            )}
+            <View>
+              {founder.name && (
+                <Text style={styles.founderName}>{founder.name}</Text>
+              )}
+              {founder.position && <Text>{founder.position}</Text>}
+            </View>
           </View>
-        </View>
-      ))}
+        ))}
     </ScrollView>
   );
 }
@@ -101,5 +157,21 @@ const styles = StyleSheet.create({
   founderName: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  errorText: {
+    fontSize: 18,
+    color: "red",
+    textAlign: "center",
   },
 });
