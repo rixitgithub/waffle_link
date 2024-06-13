@@ -37,7 +37,6 @@ export default function YourNGO() {
     const getNGODetails = async () => {
       try {
         const data = await fetchNGODetails();
-        console.log("this is the ngo", data);
         setNGO(data);
       } catch (error) {
         setError((error as Error).message);
@@ -57,43 +56,44 @@ export default function YourNGO() {
     );
   }
 
-  if (error) {
+  if (error || !ngo) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
           Error fetching NGO details. Please try again later.
         </Text>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
-  if (!ngo) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No NGO details available.</Text>
+        {error && <Text style={styles.errorText}>{error}</Text>}
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      {ngo.profilePhoto && (
-        <Image source={{ uri: ngo.profilePhoto }} style={styles.profilePhoto} />
-      )}
-      {ngo.name && <Text style={styles.name}>{ngo.name}</Text>}
-      {ngo.missionStatement && (
-        <Text style={styles.missionStatement}>{ngo.missionStatement}</Text>
-      )}
-      <Text style={styles.heading}>Contact Information:</Text>
-      {ngo.contactInfo && <Text>{ngo.contactInfo}</Text>}
-      <Text style={styles.heading}>Address:</Text>
-      {ngo.address && (
-        <Text>{`${ngo.address.street}, ${ngo.address.city}, ${ngo.address.state}, ${ngo.address.postalCode}, ${ngo.address.country}`}</Text>
-      )}
-      <Text style={styles.heading}>Founders:</Text>
-      {ngo.founders &&
-        ngo.founders.map((founder, index) => (
+      <View style={styles.header}>
+        {ngo.profilePhoto && (
+          <Image
+            source={{ uri: ngo.profilePhoto }}
+            style={styles.profilePhoto}
+          />
+        )}
+        {ngo.name && <Text style={styles.name}>{ngo.name}</Text>}
+        {ngo.missionStatement && (
+          <Text style={styles.missionStatement}>{ngo.missionStatement}</Text>
+        )}
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.heading}>Contact Information</Text>
+        <Text style={styles.content}>{ngo.contactInfo}</Text>
+      </View>
+      {/* <View style={styles.section}>
+        <Text style={styles.heading}>Address</Text>
+        <Text style={styles.content}>
+          {`${ngo.address.street}, ${ngo.address.city}, ${ngo.address.state}, ${ngo.address.postalCode}, ${ngo.address.country}`}
+        </Text>
+      </View> */}
+      <View style={styles.section}>
+        <Text style={styles.heading}>Founders</Text>
+        {ngo.founders.map((founder, index) => (
           <View key={index} style={styles.founder}>
             {founder.image && (
               <Image
@@ -102,13 +102,12 @@ export default function YourNGO() {
               />
             )}
             <View>
-              {founder.name && (
-                <Text style={styles.founderName}>{founder.name}</Text>
-              )}
-              {founder.position && <Text>{founder.position}</Text>}
+              <Text style={styles.founderName}>{founder.name}</Text>
+              <Text>{founder.position}</Text>
             </View>
           </View>
         ))}
+      </View>
     </ScrollView>
   );
 }
@@ -116,15 +115,19 @@ export default function YourNGO() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#fff",
+  },
+  header: {
+    alignItems: "center",
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   profilePhoto: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: 10,
   },
   name: {
     fontSize: 24,
@@ -136,12 +139,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: "italic",
     textAlign: "center",
-    marginBottom: 16,
+  },
+  section: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   heading: {
     fontSize: 18,
     fontWeight: "bold",
-    marginTop: 16,
+    marginBottom: 5,
+  },
+  content: {
+    fontSize: 16,
   },
   founder: {
     flexDirection: "row",
@@ -152,11 +163,12 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 8,
+    marginRight: 10,
   },
   founderName: {
     fontSize: 16,
     fontWeight: "bold",
+    marginBottom: 2,
   },
   loadingContainer: {
     flex: 1,
