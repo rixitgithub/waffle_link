@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { fetchNGODetails } from "../api/ngo"; // Adjust the path as needed
+import MyPosts from "./MyPosts"; // Import MyPosts component
 
 type NGO = {
   profilePhoto: string;
@@ -25,6 +26,12 @@ type NGO = {
     image: string;
     name: string;
     position: string;
+  }[];
+  posts: {
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string;
   }[];
 };
 
@@ -108,6 +115,8 @@ export default function YourNGO() {
           </View>
         ))}
       </View>
+      {/* Display MyPosts component */}
+      <MyPosts posts={ngo.posts} />
     </ScrollView>
   );
 }
