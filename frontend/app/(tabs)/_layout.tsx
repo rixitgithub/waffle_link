@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
 import { Image } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
@@ -12,7 +13,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [username, setUsername] = useState(null);
-  const [isOwner, setIsOwner] = useState(false); // State for ownership status
+  const [isOwner, setIsOwner] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -26,7 +27,7 @@ export default function TabLayout() {
               console.log("profile photo", userProfile.profilePicture);
               setProfilePhoto(userProfile.profilePicture);
             }
-            setIsOwner(userProfile.isOwner); // Set ownership status
+            setIsOwner(userProfile.isNgoOwner);
           }
         } catch (error) {
           console.error("Error fetching profile data:", error);
@@ -36,6 +37,7 @@ export default function TabLayout() {
       fetchProfileData();
 
       return () => {
+        console.log(isOwner);
         // Cleanup logic here (if needed)
       };
     }, [])
@@ -50,46 +52,42 @@ export default function TabLayout() {
         }}
       >
         <Tabs.Screen
-          name="ownerHome"
+          name="yourngo"
           options={{
-            title: "Owner Home",
+            title: "Your NGO",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <Ionicons
                 name={focused ? "home" : "home-outline"}
+                size={24}
                 color={color}
               />
             ),
           }}
         />
         <Tabs.Screen
-          name="ownerSettings"
+          name="createoptions"
           options={{
-            title: "Settings",
+            title: "Create",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "settings" : "settings-outline"}
+              <Ionicons
+                name={focused ? "create" : "create-outline"}
+                size={24}
                 color={color}
               />
             ),
           }}
         />
         <Tabs.Screen
-          name="ownerProfile"
+          name="volunteers"
           options={{
-            title: username || "Profile",
-            tabBarIcon: ({ color, focused }) =>
-              profilePhoto ? (
-                <Image
-                  key={profilePhoto}
-                  source={{ uri: profilePhoto }}
-                  style={{ width: 30, height: 30, borderRadius: 15 }}
-                />
-              ) : (
-                <TabBarIcon
-                  name={focused ? "person" : "person-outline"}
-                  color={color}
-                />
-              ),
+            title: "Volunteers",
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "people" : "people-outline"}
+                size={24}
+                color={color}
+              />
+            ),
           }}
         />
       </Tabs>
@@ -107,8 +105,9 @@ export default function TabLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <Ionicons
                 name={focused ? "home" : "home-outline"}
+                size={24}
                 color={color}
               />
             ),
@@ -119,8 +118,9 @@ export default function TabLayout() {
           options={{
             title: "Community",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <Ionicons
                 name={focused ? "people" : "people-outline"}
+                size={24}
                 color={color}
               />
             ),
@@ -138,8 +138,9 @@ export default function TabLayout() {
                   style={{ width: 30, height: 30, borderRadius: 15 }}
                 />
               ) : (
-                <TabBarIcon
+                <Ionicons
                   name={focused ? "person" : "person-outline"}
+                  size={24}
                   color={color}
                 />
               ),
