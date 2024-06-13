@@ -1,4 +1,3 @@
-// PostModal.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -7,7 +6,11 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 type Props = {
   visible: boolean;
@@ -24,8 +27,26 @@ const PostModal: React.FC<Props> = ({ visible, onClose, onSubmit }) => {
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState("");
 
-  const handleImageUpload = () => {
-    // Handle image upload logic if needed
+  const handleImageUpload = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission denied",
+        "We need camera roll permissions to make this work!"
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImages([...images, result.uri]);
+    }
   };
 
   const handleSubmit = () => {
@@ -49,7 +70,6 @@ const PostModal: React.FC<Props> = ({ visible, onClose, onSubmit }) => {
             value={title}
             onChangeText={setTitle}
           />
-          {/* Add image upload functionality */}
           <TextInput
             style={styles.input}
             placeholder="Enter post content"
@@ -58,6 +78,18 @@ const PostModal: React.FC<Props> = ({ visible, onClose, onSubmit }) => {
             value={content}
             onChangeText={setContent}
           />
+          <ScrollView horizontal>
+            {images.map((image, index) => (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                style={styles.imagePreview}
+              />
+            ))}
+          </ScrollView>
+          <TouchableOpacity style={styles.button} onPress={handleImageUpload}>
+            <Text style={styles.buttonText}>Upload Image</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
@@ -108,6 +140,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    marginRight: 10,
+    borderRadius: 5,
   },
 });
 
