@@ -8,6 +8,7 @@ import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { fetchUserProfile } from "../../api/user.js";
+import OwnerStack from "../OwnerStack"; // Import OwnerStack
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -44,54 +45,7 @@ export default function TabLayout() {
   );
 
   if (isOwner) {
-    return (
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-          headerShown: false,
-        }}
-      >
-        <Tabs.Screen
-          name="yourngo"
-          options={{
-            title: "Your NGO",
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "home" : "home-outline"}
-                size={24}
-                color={color}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="createoptions"
-          options={{
-            title: "Create",
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "create" : "create-outline"}
-                size={24}
-                color={color}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="volunteers"
-          options={{
-            title: "Volunteers",
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "people" : "people-outline"}
-                size={24}
-                color={color}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    );
+    return <OwnerStack />;
   } else {
     return (
       <Tabs
