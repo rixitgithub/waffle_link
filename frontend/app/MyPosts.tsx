@@ -1,6 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  Pressable,
+  Dimensions,
+} from "react-native";
 import moment from "moment";
+import Swiper from "react-native-swiper";
+
+const { width } = Dimensions.get("window");
 
 type Post = {
   id: string;
@@ -17,33 +28,39 @@ type Props = {
 const MyPosts: React.FC<Props> = ({ posts }) => {
   console.log("my posts", posts);
 
+  const renderItem = ({ item }: { item: Post }) => (
+    <View style={styles.postContainer}>
+      <View style={styles.header}>
+        <Text style={styles.postTitle}>{item.title}</Text>
+        <Text style={styles.postTime}>{moment(item.createdAt).fromNow()}</Text>
+      </View>
+      <Text style={styles.postContent}>{item.content}</Text>
+      {item.images.length > 0 && (
+        <Swiper style={styles.swiper}>
+          {item.images.map((image, index) => (
+            <View key={index}>
+              <Pressable
+                onPress={() => {
+                  /* Implement image modal if needed */
+                }}
+              >
+                <Image source={{ uri: image }} style={styles.postImage} />
+              </Pressable>
+            </View>
+          ))}
+        </Swiper>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>My Posts</Text>
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.postContainer}>
-            {item.images.length > 0 && (
-              <FlatList
-                data={item.images}
-                keyExtractor={(image) => image}
-                horizontal
-                renderItem={({ item: image }) => (
-                  <Image source={{ uri: image }} style={styles.postImage} />
-                )}
-              />
-            )}
-            <View style={styles.postContent}>
-              <Text style={styles.postTitle}>{item.title}</Text>
-              <Text style={styles.postTime}>
-                {moment(item.createdAt).fromNow()}
-              </Text>
-              <Text>{item.content}</Text>
-            </View>
-          </View>
-        )}
+        renderItem={renderItem}
+        contentContainerStyle={styles.feedContainer}
       />
     </View>
   );
@@ -51,10 +68,9 @@ const MyPosts: React.FC<Props> = ({ posts }) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-    paddingTop: 20,
+    backgroundColor: "#f0f0f0",
   },
   heading: {
     fontSize: 18,
@@ -62,31 +78,44 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
+  feedContainer: {
+    padding: 10,
+  },
   postContainer: {
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingBottom: 15,
+    marginBottom: 20,
+    borderRadius: 10,
+    padding: 15,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  postImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  postContent: {
-    flex: 1,
-    marginTop: 10,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
   },
   postTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
   },
   postTime: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
-    marginBottom: 5,
+  },
+  postContent: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  swiper: {
+    height: 200,
+  },
+  postImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
   },
 });
 
