@@ -44,6 +44,7 @@ export default function YourNGO() {
     const getNGODetails = async () => {
       try {
         const data = await fetchNGODetails();
+        console.log("ngo data", data);
         setNGO(data);
       } catch (error) {
         setError((error as Error).message);
