@@ -11,18 +11,14 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { createPost } from "../api/post"; // Import createPost function from api.ts
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (postData: {
-    title: string;
-    images: string[];
-    content: string;
-  }) => void;
 };
 
-const PostModal: React.FC<Props> = ({ visible, onClose, onSubmit }) => {
+const PostModal: React.FC<Props> = ({ visible, onClose }) => {
   const [title, setTitle] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState("");
@@ -44,19 +40,33 @@ const PostModal: React.FC<Props> = ({ visible, onClose, onSubmit }) => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImages([...images, result.uri]);
+    if (!result.canceled && result.assets) {
+      const newImages = result.assets.map((asset) => asset.uri);
+      setImages([...images, ...newImages]);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate input fields if necessary
-    onSubmit({ title, images, content });
-    // Reset state and close modal
-    setTitle("");
-    setImages([]);
-    setContent("");
-    onClose();
+    const postData = { title, images, content };
+    console.log("post data", postData);
+    try {
+      const success = await createPost(postData);
+
+      if (success) {
+        Alert.alert("Success", "Post created successfully");
+        // Reset state and close modal
+        setTitle("");
+        setImages([]);
+        setContent("");
+        onClose();
+      } else {
+        throw new Error("Failed to create post");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      Alert.alert("Error", "Failed to create post. Please try again later.");
+    }
   };
 
   return (

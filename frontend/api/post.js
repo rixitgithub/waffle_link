@@ -1,7 +1,7 @@
-// api.js
-const API_URL = "http://10.0.2.2:4000";
-
+import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const API_URL = "http://10.0.2.2:4000";
 
 export const createPost = async (postData) => {
   try {
@@ -9,16 +9,15 @@ export const createPost = async (postData) => {
     if (!token) {
       throw new Error("No authentication token found");
     }
-    const response = await fetch(`${API_URL}/api/posts`, {
-      method: "POST",
+
+    const response = await axios.post(`${API_URL}/api/posts/create`, postData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`, // Include authorization header with token
       },
-      body: JSON.stringify(postData),
     });
 
-    if (!response.ok) {
+    if (response.status !== 201) {
       throw new Error("Failed to create post");
     }
 

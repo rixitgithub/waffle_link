@@ -8,7 +8,9 @@ const router = express.Router();
 // POST endpoint to create a new post
 router.post("/create", authMiddleware, async (req, res) => {
   try {
-    const { userId } = req;
+    console.log("post data", req.body);
+    const userId = req.user._id;
+    console.log("user", userId);
     const { title, images, content } = req.body;
 
     // Create a new Post instance

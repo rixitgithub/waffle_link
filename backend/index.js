@@ -22,7 +22,7 @@ app.use(express.json());
 app.use("/api/users", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ngo", ngoRoutes);
-app.use("/api/post", postRoutes);
+app.use("/api/posts", postRoutes);
 
 mongoose
   .connect(process.env.DB_CONNECTION, {
