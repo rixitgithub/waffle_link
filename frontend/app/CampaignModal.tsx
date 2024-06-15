@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Modal,
   StyleSheet,
   TextInput,
-  Button,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Icon from "react-native-vector-icons/Ionicons"; // Import Ionicons from react-native-vector-icons
+import Icon from "react-native-vector-icons/Ionicons";
 
 const CampaignModal = ({ visible, onClose, type }) => {
   const [title, setTitle] = useState("");
@@ -20,13 +19,50 @@ const CampaignModal = ({ visible, onClose, type }) => {
   const [currency, setCurrency] = useState("USD");
   const [endDate, setEndDate] = useState(new Date());
   const [volunteerCount, setVolunteerCount] = useState("");
-  const [skillsRequired, setSkillsRequired] = useState("");
-  const [engagements, setEngagements] = useState("");
-  const [expectations, setExpectations] = useState("");
+  const [skills, setSkills] = useState([]);
+  const [newSkill, setNewSkill] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [shares, setShares] = useState("");
+  const [likes, setLikes] = useState("");
+
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    validateForm();
+  }, [
+    title,
+    description,
+    goal,
+    currency,
+    endDate,
+    volunteerCount,
+    shares,
+    likes,
+    skills,
+  ]);
+
+  const validateForm = () => {
+    switch (type) {
+      case "fundraising":
+        setIsFormValid(title !== "" && description !== "" && goal !== "");
+        break;
+      case "volunteer":
+        setIsFormValid(
+          title !== "" && description !== "" && volunteerCount !== ""
+        );
+        break;
+      case "awareness":
+        setIsFormValid(
+          title !== "" && description !== "" && shares !== "" && likes !== ""
+        );
+        break;
+      default:
+        setIsFormValid(false);
+        break;
+    }
+  };
 
   const handleCreateCampaign = () => {
-    // Handle campaign creation logic here based on type
     console.log({
       title,
       description,
@@ -34,12 +70,19 @@ const CampaignModal = ({ visible, onClose, type }) => {
       currency,
       endDate,
       volunteerCount,
-      skillsRequired,
-      engagements,
-      expectations,
+      skills,
+      shares,
+      likes,
       type,
     });
     onClose();
+  };
+
+  const handleAddSkill = () => {
+    if (newSkill.trim() !== "") {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill("");
+    }
   };
 
   const renderFundraisingFields = () => (
@@ -64,19 +107,11 @@ const CampaignModal = ({ visible, onClose, type }) => {
         onChangeText={setGoal}
         keyboardType="numeric"
       />
-      <View style={styles.datePickerContainer}>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerIcon}
-        >
-          <Icon name="calendar-outline" size={24} color="#333" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.dateText}>
-            {endDate.toLocaleDateString()} {/* Display selected date */}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <Text style={styles.dateText}>
+          {endDate.toLocaleDateString()} {/* Display selected date */}
+        </Text>
+      </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
           value={endDate}
@@ -102,25 +137,11 @@ const CampaignModal = ({ visible, onClose, type }) => {
         onChangeText={setVolunteerCount}
         keyboardType="numeric"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Skills Required"
-        value={skillsRequired}
-        onChangeText={setSkillsRequired}
-      />
-      <View style={styles.datePickerContainer}>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerIcon}
-        >
-          <Icon name="calendar-outline" size={24} color="#333" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.dateText}>
-            {endDate.toLocaleDateString()} {/* Display selected date */}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <Text style={styles.dateText}>
+          {endDate.toLocaleDateString()} {/* Display selected date */}
+        </Text>
+      </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
           value={endDate}
@@ -141,30 +162,23 @@ const CampaignModal = ({ visible, onClose, type }) => {
     <>
       <TextInput
         style={styles.input}
-        placeholder="Target Engagements (e.g., shares, likes)"
-        value={engagements}
-        onChangeText={setEngagements}
+        placeholder="Target Shares"
+        value={shares}
+        onChangeText={setShares}
         keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
-        placeholder="Expectations"
-        value={expectations}
-        onChangeText={setExpectations}
+        placeholder="Target Likes"
+        value={likes}
+        onChangeText={setLikes}
+        keyboardType="numeric"
       />
-      <View style={styles.datePickerContainer}>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerIcon}
-        >
-          <Icon name="calendar-outline" size={24} color="#333" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.dateText}>
-            {endDate.toLocaleDateString()} {/* Display selected date */}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <Text style={styles.dateText}>
+          {endDate.toLocaleDateString()} {/* Display selected date */}
+        </Text>
+      </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
           value={endDate}
@@ -204,9 +218,33 @@ const CampaignModal = ({ visible, onClose, type }) => {
         {type === "volunteer" && renderVolunteerFields()}
         {type === "awareness" && renderAwarenessFields()}
 
+        {type === "volunteer" && (
+          <View style={styles.skillsContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter skill"
+              value={newSkill}
+              onChangeText={setNewSkill}
+            />
+            <TouchableOpacity onPress={handleAddSkill}>
+              <Icon name="add-circle-outline" size={30} color="#007bff" />
+            </TouchableOpacity>
+          </View>
+        )}
+        {type === "volunteer" && (
+          <View style={styles.skillsList}>
+            {skills.map((skill, index) => (
+              <View key={index} style={styles.skillItem}>
+                <Text style={styles.skillText}>{skill}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         <TouchableOpacity
-          style={styles.createButton}
+          style={[styles.createButton, !isFormValid && styles.disabledButton]}
           onPress={handleCreateCampaign}
+          disabled={!isFormValid}
         >
           <Text style={styles.createButtonText}>Create Campaign</Text>
         </TouchableOpacity>
@@ -254,13 +292,26 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
   },
-  datePickerContainer: {
+  skillsContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
-  datePickerIcon: {
-    paddingHorizontal: 10,
+  skillsList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 10,
+  },
+  skillItem: {
+    backgroundColor: "#f0f0f0",
+    padding: 8,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  skillText: {
+    fontSize: 14,
+    color: "#333",
   },
   dateText: {
     fontSize: 16,
@@ -278,6 +329,9 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: "#ccc", // Change the disabled button style as needed
   },
   cancelButton: {
     backgroundColor: "#dc3545",

@@ -1,14 +1,21 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import CampaignModal from "./CampaignModal"; // Import CampaignModal component
+import PostModal from "./PostModal"; // Import PostModal component
 
 const CreateOptions: React.FC = () => {
   const [campaignModalVisible, setCampaignModalVisible] = useState(false);
   const [campaignType, setCampaignType] = useState<null | string>(null);
 
+  const [postModalVisible, setPostModalVisible] = useState(false);
+
   const openCampaignModal = (type: string) => {
     setCampaignType(type);
     setCampaignModalVisible(true);
+  };
+
+  const openPostModal = () => {
+    setPostModalVisible(true);
   };
 
   return (
@@ -36,11 +43,21 @@ const CreateOptions: React.FC = () => {
         <Text style={styles.optionText}>Create Awareness Campaign</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.option} onPress={openPostModal}>
+        <Text style={styles.optionText}>Create Post</Text>
+      </TouchableOpacity>
+
       {/* CampaignModal component */}
       <CampaignModal
         visible={campaignModalVisible}
         onClose={() => setCampaignModalVisible(false)}
         type={campaignType}
+      />
+
+      {/* PostModal component */}
+      <PostModal
+        visible={postModalVisible}
+        onClose={() => setPostModalVisible(false)}
       />
     </View>
   );
