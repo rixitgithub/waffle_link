@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { fetchNGODetails } from "../api/ngo"; // Adjust the path as needed
 import MyPosts from "./MyPosts"; // Import MyPosts component
@@ -39,6 +40,7 @@ export default function YourNGO() {
   const [ngo, setNGO] = useState<NGO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"posts" | "campaigns">("posts");
 
   useEffect(() => {
     const getNGODetails = async () => {
@@ -55,6 +57,14 @@ export default function YourNGO() {
 
     getNGODetails();
   }, []);
+
+  const handleViewPosts = () => {
+    setViewMode("posts");
+  };
+
+  const handleViewCampaigns = () => {
+    setViewMode("campaigns");
+  };
 
   if (loading) {
     return (
@@ -116,8 +126,50 @@ export default function YourNGO() {
           </View>
         ))}
       </View>
-      {/* Display MyPosts component */}
-      <MyPosts posts={ngo.posts} />
+      {/* Display buttons to navigate to Posts and Campaigns */}
+      <View style={styles.navigationButtons}>
+        <TouchableOpacity
+          style={[
+            styles.navigationButton,
+            viewMode === "posts" && styles.activeNavigationButton,
+          ]}
+          onPress={handleViewPosts}
+        >
+          <Text
+            style={[
+              styles.navigationButtonText,
+              viewMode === "posts" && styles.activeNavigationButtonText,
+            ]}
+          >
+            Posts
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.navigationButton,
+            viewMode === "campaigns" && styles.activeNavigationButton,
+          ]}
+          onPress={handleViewCampaigns}
+        >
+          <Text
+            style={[
+              styles.navigationButtonText,
+              viewMode === "campaigns" && styles.activeNavigationButtonText,
+            ]}
+          >
+            Campaigns
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {/* Conditional rendering based on viewMode */}
+      {viewMode === "posts" && <MyPosts posts={ngo.posts} />}
+      {viewMode === "campaigns" && (
+        <View style={styles.section}>
+          <Text style={styles.heading}>Campaigns</Text>
+          <Text style={styles.content}>Display Campaigns here...</Text>
+          {/* Replace with actual Campaigns component or logic */}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -179,6 +231,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 2,
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  navigationButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: "#007bff",
+  },
+  navigationButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "center",
+  },
+  activeNavigationButton: {
+    backgroundColor: "#0056b3", // Adjust active button style as needed
+  },
+  activeNavigationButtonText: {
+    fontWeight: "bold",
   },
   loadingContainer: {
     flex: 1,

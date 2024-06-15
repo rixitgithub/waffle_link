@@ -29,6 +29,7 @@ const CampaignModal = ({ visible, onClose, type }) => {
   const [likes, setLikes] = useState("");
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
 
   useEffect(() => {
     validateForm();
@@ -83,6 +84,7 @@ const CampaignModal = ({ visible, onClose, type }) => {
     createCampaign(campaignData)
       .then((response) => {
         console.log("Campaign created successfully:", response);
+        setIsCreatedSuccessfully(true); // Set state to display success message
         onClose(); // Close modal after successful creation
       })
       .catch((error) => {
@@ -264,6 +266,12 @@ const CampaignModal = ({ visible, onClose, type }) => {
         <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
+
+        {isCreatedSuccessfully && (
+          <Text style={styles.successMessage}>
+            Campaign created successfully!
+          </Text>
+        )}
       </ScrollView>
     </Modal>
   );
@@ -352,10 +360,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "100%",
     alignItems: "center",
+    marginBottom: 10,
   },
   cancelButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  successMessage: {
+    fontSize: 18,
+    color: "#28a745",
+    marginTop: 20,
+    textAlign: "center",
   },
 });
 
