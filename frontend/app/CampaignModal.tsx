@@ -12,6 +12,9 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Icon from "react-native-vector-icons/Ionicons";
 
+// Import the API function to handle create campaign request
+import { createCampaign } from "../api/campaign"; // Replace with the actual path to your API handling file
+
 const CampaignModal = ({ visible, onClose, type }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -63,7 +66,7 @@ const CampaignModal = ({ visible, onClose, type }) => {
   };
 
   const handleCreateCampaign = () => {
-    console.log({
+    const campaignData = {
       title,
       description,
       goal,
@@ -74,8 +77,18 @@ const CampaignModal = ({ visible, onClose, type }) => {
       shares,
       likes,
       type,
-    });
-    onClose();
+    };
+
+    // Call API function to create campaign
+    createCampaign(campaignData)
+      .then((response) => {
+        console.log("Campaign created successfully:", response);
+        onClose(); // Close modal after successful creation
+      })
+      .catch((error) => {
+        console.error("Error creating campaign:", error);
+        // Handle error scenario if needed
+      });
   };
 
   const handleAddSkill = () => {
