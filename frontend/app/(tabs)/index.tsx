@@ -1,4 +1,3 @@
-// HomeScreen.tsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -8,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
@@ -16,7 +16,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import Banner from "../banner";
 import { FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
+import { useNavigation } from "@react-navigation/native";
+import { fetchPostsAndCampaigns } from "../../api/user"; // Import fetchPostsAndCampaigns
+
 const { width } = Dimensions.get("window");
 
 interface Post {
@@ -24,54 +26,39 @@ interface Post {
   userImage: string;
   userName: string;
   postText: string;
-  postImages: string[]; // Updated interface to include multiple post images
+  postImages: string[];
   views: number;
   likes: number;
   comments: number;
 }
 
-const dummyData: Post[] = [
-  {
-    id: "1",
-    userImage: "https://via.placeholder.com/40",
-    userName: "User One",
-    postText: "Loving this view!",
-    postImages: [
-      "https://via.placeholder.com/700x400",
-      "https://via.placeholder.com/600x400",
-      "https://via.placeholder.com/600x400",
-    ],
-    views: 120,
-    likes: 30,
-    comments: 10,
-  },
-  {
-    id: "2",
-    userImage: "https://via.placeholder.com/40",
-    userName: "User Two",
-    postText: "Amazing sunset today.",
-    postImages: ["https://via.placeholder.com/600x400"],
-    views: 80,
-    likes: 25,
-    comments: 5,
-  },
-];
-
 const HomeScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [campaigns, setCampaigns] = useState<Post[]>([]);
+  const [viewMode, setViewMode] = useState<"posts" | "campaigns">("posts");
   const navigation = useNavigation();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const refreshPage = async () => {
-        // Your refresh logic here
-        console.log("HomeScreen refreshed");
-      };
-      refreshPage();
-    }, [])
-  );
+  useEffect(() => {
+    fetchPostsAndCampaignsData();
+  }, []);
+
+  const fetchPostsAndCampaignsData = async () => {
+    try {
+      console.log("inside i am");
+      const { posts: fetchedPosts, campaigns: fetchedCampaigns } =
+        await fetchPostsAndCampaigns();
+      console.log("fetched posts", fetchedPosts);
+      console.log("fetched campaigns ", fetchedCampaigns);
+      setPosts(fetchedPosts);
+      setCampaigns(fetchedCampaigns);
+    } catch (error) {
+      console.error("Error fetching posts and campaigns:", error);
+      // Handle error state if needed
+    }
+  };
 
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -102,15 +89,21 @@ const HomeScreen: React.FC = () => {
       <Text style={[styles.postText, { color: colors.text }]}>
         {item.postText}
       </Text>
-      <Swiper style={styles.swiper}>
-        {item.postImages.map((image, index) => (
-          <View key={index}>
-            <Pressable onPress={() => openImageModal(image)}>
-              <Image source={{ uri: image }} style={styles.postImage} />
-            </Pressable>
-          </View>
-        ))}
-      </Swiper>
+      {item.postImages && item.postImages.length > 0 ? (
+        <Swiper style={styles.swiper}>
+          {item.postImages.map((image, index) => (
+            <View key={index}>
+              <Pressable onPress={() => openImageModal(image)}>
+                <Image source={{ uri: image }} style={styles.postImage} />
+              </Pressable>
+            </View>
+          ))}
+        </Swiper>
+      ) : (
+        <View style={styles.noImageContainer}>
+          <Text style={styles.noImageText}>No images available</Text>
+        </View>
+      )}
       <View style={styles.postStats}>
         <View style={styles.statsLeft}>
           <FontAwesome
@@ -150,8 +143,42 @@ const HomeScreen: React.FC = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Banner />
+      <View style={styles.toggleButtons}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            viewMode === "posts" && styles.activeToggleButton,
+          ]}
+          onPress={() => setViewMode("posts")}
+        >
+          <Text
+            style={[
+              styles.toggleButtonText,
+              viewMode === "posts" && styles.activeToggleButtonText,
+            ]}
+          >
+            Posts
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            viewMode === "campaigns" && styles.activeToggleButton,
+          ]}
+          onPress={() => setViewMode("campaigns")}
+        >
+          <Text
+            style={[
+              styles.toggleButtonText,
+              viewMode === "campaigns" && styles.activeToggleButtonText,
+            ]}
+          >
+            Campaigns
+          </Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
-        data={dummyData}
+        data={viewMode === "posts" ? posts : campaigns}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.feedContainer}
@@ -198,7 +225,6 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.text,
   },
   timeAgo: {
     fontSize: 12,
@@ -207,7 +233,6 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 14,
     marginBottom: 10,
-    color: Colors.text,
   },
   postImage: {
     width: "100%",
@@ -243,6 +268,30 @@ const styles = StyleSheet.create({
   },
   swiper: {
     height: 200,
+  },
+  toggleButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: Colors.inactive,
+  },
+  activeToggleButton: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  toggleButtonText: {
+    fontSize: 16,
+    color: Colors.inactive,
+  },
+  activeToggleButtonText: {
+    color: Colors.background,
   },
 });
 

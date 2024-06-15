@@ -39,5 +39,16 @@ router.post("/create", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+router.get("/get", async (req, res) => {
+  console.log("hiccccc");
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 }); // Sort by createdAt descending
+    console.log(posts);
+    res.json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

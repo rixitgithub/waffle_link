@@ -58,4 +58,15 @@ router.post("/create", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/get", async (req, res) => {
+  try {
+    const campaigns = await Campaign.find().sort({ createdAt: -1 }); // Sort by createdAt descending
+    console.log(campaigns);
+    res.json(campaigns);
+  } catch (error) {
+    console.error("Error fetching campaigns:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
