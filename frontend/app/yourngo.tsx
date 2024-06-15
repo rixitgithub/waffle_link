@@ -7,9 +7,15 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  RefreshControl,
+  Modal,
+  Alert,
 } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchNGODetails } from "../api/ngo"; // Adjust the path as needed
 import MyPosts from "./MyPosts"; // Import MyPosts component
+import MyCampaigns from "./MyCampaigns"; // Import Campaigns component
 
 type NGO = {
   profilePhoto: string;
@@ -34,6 +40,11 @@ type NGO = {
     content: string;
     imageUrl?: string;
   }[];
+  campaigns: {
+    id: string;
+    title: string;
+    description: string;
+  }[];
 };
 
 export default function YourNGO() {
@@ -41,22 +52,30 @@ export default function YourNGO() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"posts" | "campaigns">("posts");
+  const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const getNGODetails = async () => {
+    try {
+      const data = await fetchNGODetails();
+      console.log("ngo data", data);
+      setNGO(data);
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const getNGODetails = async () => {
-      try {
-        const data = await fetchNGODetails();
-        console.log("ngo data", data);
-        setNGO(data);
-      } catch (error) {
-        setError((error as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     getNGODetails();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getNGODetails();
+  };
 
   const handleViewPosts = () => {
     setViewMode("posts");
@@ -66,7 +85,18 @@ export default function YourNGO() {
     setViewMode("campaigns");
   };
 
-  if (loading) {
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("token");
+      // You might want to navigate to the login screen after logging out
+      console.log("Logged out");
+    } catch (error) {
+      console.error("Error removing token", error);
+    }
+    setModalVisible(false);
+  };
+
+  if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -86,8 +116,19 @@ export default function YourNGO() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Icon name="logout" size={24} color="#000" />
+        </TouchableOpacity>
         {ngo.profilePhoto && (
           <Image
             source={{ uri: ngo.profilePhoto }}
@@ -103,12 +144,6 @@ export default function YourNGO() {
         <Text style={styles.heading}>Contact Information</Text>
         <Text style={styles.content}>{ngo.contactInfo}</Text>
       </View>
-      {/* <View style={styles.section}>
-        <Text style={styles.heading}>Address</Text>
-        <Text style={styles.content}>
-          {`${ngo.address.street}, ${ngo.address.city}, ${ngo.address.state}, ${ngo.address.postalCode}, ${ngo.address.country}`}
-        </Text>
-      </View> */}
       <View style={styles.section}>
         <Text style={styles.heading}>Founders</Text>
         {ngo.founders.map((founder, index) => (
@@ -126,7 +161,6 @@ export default function YourNGO() {
           </View>
         ))}
       </View>
-      {/* Display buttons to navigate to Posts and Campaigns */}
       <View style={styles.navigationButtons}>
         <TouchableOpacity
           style={[
@@ -161,15 +195,36 @@ export default function YourNGO() {
           </Text>
         </TouchableOpacity>
       </View>
-      {/* Conditional rendering based on viewMode */}
       {viewMode === "posts" && <MyPosts posts={ngo.posts} />}
-      {viewMode === "campaigns" && (
-        <View style={styles.section}>
-          <Text style={styles.heading}>Campaigns</Text>
-          <Text style={styles.content}>Display Campaigns here...</Text>
-          {/* Replace with actual Campaigns component or logic */}
+      {viewMode === "campaigns" && <MyCampaigns campaigns={ngo.campaigns} />}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Are you sure you want to logout?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonYes]}
+                onPress={handleLogout}
+              >
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonNo]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      )}
+      </Modal>
     </ScrollView>
   );
 }
@@ -184,6 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+    position: "relative",
   },
   profilePhoto: {
     width: 100,
@@ -255,6 +311,12 @@ const styles = StyleSheet.create({
   activeNavigationButtonText: {
     fontWeight: "bold",
   },
+  logoutButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -270,5 +332,43 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "red",
     textAlign: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+    alignItems: "center",
+  },
+  modalButtonYes: {
+    backgroundColor: "#28a745",
+  },
+  modalButtonNo: {
+    backgroundColor: "#dc3545",
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

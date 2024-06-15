@@ -61,6 +61,31 @@ const campaignSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // Progress fields for each type of campaign
+  progress: {
+    fundraising: {
+      currentAmount: {
+        type: Number,
+        default: 0,
+      },
+    },
+    volunteer: {
+      currentVolunteers: {
+        type: Number,
+        default: 0,
+      },
+    },
+    awareness: {
+      currentShares: {
+        type: Number,
+        default: 0,
+      },
+      currentLikes: {
+        type: Number,
+        default: 0,
+      },
+    },
+  },
 });
 
 // Create and export Campaign model based on schema

@@ -29,8 +29,10 @@ router.get("/details", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id; // Assuming authMiddleware sets req.user with user details
 
-    // Query the NGO associated with the authenticated user and populate post details
-    const ngo = await Ngo.findOne({ owner: userId }).populate("posts");
+    // Query the NGO associated with the authenticated user
+    const ngo = await Ngo.findOne({ owner: userId })
+      .populate("posts") // Populate posts
+      .populate("campaigns"); // Populate campaigns
 
     if (!ngo) {
       return res.status(404).json({ message: "NGO not found for this user" });
