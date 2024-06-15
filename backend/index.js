@@ -10,6 +10,7 @@ const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const ngoRoutes = require("./routes/ngoRoutes.js");
 const postRoutes = require("./routes/postRoutes.js");
+const campaignRoutes = require("./routes/campaignRoutes.js");
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use("/api/users", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ngo", ngoRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/campaigns", campaignRoutes);
 
 mongoose
   .connect(process.env.DB_CONNECTION, {
