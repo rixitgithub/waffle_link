@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
@@ -15,6 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { fetchPostsAndCampaigns } from "../../api/user"; // Import fetchPostsAndCampaigns
 import PostComponent from "../PostComponent"; // Import your PostComponent
 import CampaignComponent from "../CampaignComponent"; // Import your CampaignComponent
+import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome
 
 const { width } = Dimensions.get("window");
 
@@ -81,7 +83,20 @@ const HomeScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <View style={styles.header}>
+        <FontAwesome
+          name="home"
+          size={24}
+          color={colors.text}
+          style={styles.headerIcon}
+        />
+        <Text style={[styles.headerText, { color: colors.text }]}>
+          Ngo Connect
+        </Text>
+      </View>
       <View style={styles.toggleButtons}>
         <TouchableOpacity
           style={[
@@ -134,13 +149,28 @@ const HomeScreen: React.FC = () => {
           />
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 10,
     flex: 1,
+  },
+  header: {
+    paddingVertical: 30,
+    paddingHorizontal: 15,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerIcon: {
+    marginRight: 10,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    fontFamily: "Helvetica", // Use a clean, nice font
   },
   feedContainer: {
     padding: 10,
