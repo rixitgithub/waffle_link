@@ -1,23 +1,46 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import PostModal from "./PostModal"; // Import PostModal component
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import CampaignModal from "./CampaignModal"; // Import CampaignModal component
 
 const CreateOptions: React.FC = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [campaignModalVisible, setCampaignModalVisible] = useState(false);
+  const [campaignType, setCampaignType] = useState<null | string>(null);
+
+  const openCampaignModal = (type: string) => {
+    setCampaignType(type);
+    setCampaignModalVisible(true);
+  };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.option}
-        onPress={() => setModalVisible(true)}
+        onPress={() => openCampaignModal("fundraising")}
       >
-        <Text style={styles.optionText}>Create Post</Text>
+        <Text style={styles.optionText}>Create Fundraising Campaign</Text>
       </TouchableOpacity>
 
-      {/* PostModal component */}
-      <PostModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+      <TouchableOpacity
+        style={styles.option}
+        onPress={() => openCampaignModal("volunteer")}
+      >
+        <Text style={styles.optionText}>
+          Create Volunteer Recruitment Campaign
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.option}
+        onPress={() => openCampaignModal("awareness")}
+      >
+        <Text style={styles.optionText}>Create Awareness Campaign</Text>
+      </TouchableOpacity>
+
+      {/* CampaignModal component */}
+      <CampaignModal
+        visible={campaignModalVisible}
+        onClose={() => setCampaignModalVisible(false)}
+        type={campaignType}
       />
     </View>
   );
