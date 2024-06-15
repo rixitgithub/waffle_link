@@ -29,6 +29,12 @@ const ngoSchema = new Schema({
       ref: "Post", // Assuming you have a Post model
     },
   ],
+  campaigns: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Campaign", // Assuming you have a Campaign model
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
