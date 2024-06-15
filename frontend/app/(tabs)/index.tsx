@@ -6,18 +6,15 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-  Pressable,
   TouchableOpacity,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useFocusEffect } from "@react-navigation/native";
-import Banner from "../banner";
-import { FontAwesome } from "@expo/vector-icons";
-import Swiper from "react-native-swiper";
 import { useNavigation } from "@react-navigation/native";
 import { fetchPostsAndCampaigns } from "../../api/user"; // Import fetchPostsAndCampaigns
+import PostComponent from "../PostComponent"; // Import your PostComponent
+import CampaignComponent from "../CampaignComponent"; // Import your CampaignComponent
 
 const { width } = Dimensions.get("window");
 
@@ -47,11 +44,8 @@ const HomeScreen: React.FC = () => {
 
   const fetchPostsAndCampaignsData = async () => {
     try {
-      console.log("inside i am");
       const { posts: fetchedPosts, campaigns: fetchedCampaigns } =
         await fetchPostsAndCampaigns();
-      console.log("fetched posts", fetchedPosts);
-      console.log("fetched campaigns ", fetchedCampaigns);
       setPosts(fetchedPosts);
       setCampaigns(fetchedCampaigns);
     } catch (error) {
@@ -68,81 +62,26 @@ const HomeScreen: React.FC = () => {
     navigation.navigate("UserDetailsScreen", { userId });
   };
 
-  const renderItem = ({ item }: { item: Post }) => (
-    <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
-      <View style={styles.userContainer}>
-        <Pressable onPress={() => openUserDetails(item.id)}>
-          <Image source={{ uri: item.userImage }} style={styles.userImage} />
-        </Pressable>
+  const renderPostItem = ({ item }: { item: Post }) => (
+    <PostComponent
+      item={item}
+      colors={colors}
+      openImageModal={openImageModal}
+      openUserDetails={openUserDetails}
+    />
+  );
 
-        <Pressable onPress={() => openUserDetails(item.id)}>
-          <Text style={[styles.userName, { color: colors.text }]}>
-            {item.userName}
-          </Text>
-        </Pressable>
-        <View>
-          <Text style={[styles.timeAgo, { color: colors.inactive }]}>
-            99 days ago
-          </Text>
-        </View>
-      </View>
-      <Text style={[styles.postText, { color: colors.text }]}>
-        {item.postText}
-      </Text>
-      {item.postImages && item.postImages.length > 0 ? (
-        <Swiper style={styles.swiper}>
-          {item.postImages.map((image, index) => (
-            <View key={index}>
-              <Pressable onPress={() => openImageModal(image)}>
-                <Image source={{ uri: image }} style={styles.postImage} />
-              </Pressable>
-            </View>
-          ))}
-        </Swiper>
-      ) : (
-        <View style={styles.noImageContainer}>
-          <Text style={styles.noImageText}>No images available</Text>
-        </View>
-      )}
-      <View style={styles.postStats}>
-        <View style={styles.statsLeft}>
-          <FontAwesome
-            name="eye"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            {item.views}
-          </Text>
-          <FontAwesome
-            name="heart"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            {item.likes}
-          </Text>
-          <FontAwesome
-            name="comment"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            {item.comments}
-          </Text>
-        </View>
-        <FontAwesome
-          name="share"
-          size={20}
-          style={[styles.shareIcon, { color: colors.inactive }]}
-        />
-      </View>
-    </View>
+  const renderCampaignItem = ({ item }: { item: Post }) => (
+    <CampaignComponent
+      item={item}
+      colors={colors}
+      openImageModal={openImageModal}
+      openUserDetails={openUserDetails}
+    />
   );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Banner />
       <View style={styles.toggleButtons}>
         <TouchableOpacity
           style={[
@@ -179,7 +118,7 @@ const HomeScreen: React.FC = () => {
       </View>
       <FlatList
         data={viewMode === "posts" ? posts : campaigns}
-        renderItem={renderItem}
+        renderItem={viewMode === "posts" ? renderPostItem : renderCampaignItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.feedContainer}
       />
@@ -206,69 +145,6 @@ const styles = StyleSheet.create({
   feedContainer: {
     padding: 10,
   },
-  postContainer: {
-    marginBottom: 20,
-    borderRadius: 10,
-    padding: 15,
-  },
-  userContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  userImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  timeAgo: {
-    fontSize: 12,
-    color: Colors.inactive,
-  },
-  postText: {
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  postImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-  },
-  postStats: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  statsLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statIcon: {
-    marginRight: 5,
-  },
-  statText: {
-    marginRight: 15,
-    fontSize: 14,
-  },
-  shareIcon: {},
-  modalContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalImage: {
-    width: width * 0.9,
-    height: width * 0.9,
-  },
-  swiper: {
-    height: 200,
-  },
   toggleButtons: {
     flexDirection: "row",
     justifyContent: "center",
@@ -280,18 +156,28 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: Colors.inactive,
+    borderColor: "gray",
   },
   activeToggleButton: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: "blue", // Change to your active color
+    borderColor: "blue", // Change to your active color
   },
   toggleButtonText: {
     fontSize: 16,
-    color: Colors.inactive,
+    color: "gray",
   },
   activeToggleButtonText: {
-    color: Colors.background,
+    color: "white", // Change to your active text color
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalImage: {
+    width: "90%",
+    height: "90%",
+    borderRadius: 10,
   },
 });
 
