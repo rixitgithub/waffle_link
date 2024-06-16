@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ interface PostComponentProps {
   colors: any; // Adjust type as per your Colors definition
   openImageModal: (imageUrl: string) => void;
   openUserDetails: (userId: string) => void;
+  userId: string; // Assuming you have a way to pass the user's ID
 }
 
 const PostComponent: React.FC<PostComponentProps> = ({
@@ -24,40 +25,82 @@ const PostComponent: React.FC<PostComponentProps> = ({
   colors,
   openImageModal,
   openUserDetails,
+  userId,
 }) => {
-  const [upvoted, setUpvoted] = useState(false);
+  const [upvoted, setUpvoted] = useState(item.upvotes.includes(userId));
   const [upvotes, setUpvotes] = useState(item.upvotes?.length ?? 0);
-  const scaleValue = new Animated.Value(1);
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const rotateValue = useRef(new Animated.Value(0)).current;
+  const fadeValue = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    setUpvotes(item.upvotes?.length ?? 0);
+    setUpvoted(item.upvotes.includes(userId));
+  }, [item.upvotes, userId]);
 
   const handleUpvote = async () => {
-    if (upvoted) return; // Prevent multiple upvotes
-
     // Animate the thumbs-up icon
     Animated.sequence([
-      Animated.timing(scaleValue, {
-        toValue: 1.3,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleValue, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }),
+      Animated.parallel([
+        Animated.timing(scaleValue, {
+          toValue: 1.5,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeValue, {
+          toValue: 0.7,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotateValue, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(scaleValue, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeValue, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotateValue, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
 
-    setUpvoted(true);
-    setUpvotes(upvotes + 1);
+    if (upvoted) {
+      setUpvoted(false);
+      setUpvotes((prevUpvotes) => prevUpvotes - 1);
+    } else {
+      setUpvoted(true);
+      setUpvotes((prevUpvotes) => prevUpvotes + 1);
+    }
 
     // Call the upvote function from the API file
     try {
       await upvotePost(item._id);
     } catch (error) {
       console.error(error);
-      setUpvoted(false);
-      setUpvotes(upvotes); // Revert upvotes count on error
+      setUpvoted((prevUpvoted) => !prevUpvoted);
+      setUpvotes((prevUpvotes) =>
+        upvoted ? prevUpvotes + 1 : prevUpvotes - 1
+      ); // Revert upvotes count on error
     }
   };
+
+  const rotateInterpolate = rotateValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
     <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
@@ -98,7 +141,15 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <View style={styles.postStats}>
         <View style={styles.statsLeft}>
           <Pressable onPress={handleUpvote} style={styles.upvoteButton}>
-            <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+            <Animated.View
+              style={{
+                transform: [
+                  { scale: scaleValue },
+                  { rotate: rotateInterpolate },
+                ],
+                opacity: fadeValue,
+              }}
+            >
               <FontAwesome
                 name="thumbs-up"
                 size={20}
@@ -112,7 +163,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
             </Animated.View>
           </Pressable>
           <Text style={[styles.statText, { color: colors.inactive }]}>
-            {upvotes} {/* Replace with actual upvotes count */}
+            {upvotes} {/* Display the dynamic upvotes count */}
           </Text>
           <FontAwesome
             name="comment"
@@ -121,7 +172,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
           />
           <Text style={[styles.statText, { color: colors.inactive }]}>
             {item.comments?.length ?? 0}{" "}
-            {/* Replace with actual comments count */}
+            {/* Display the dynamic comments count */}
           </Text>
         </View>
         <FontAwesome

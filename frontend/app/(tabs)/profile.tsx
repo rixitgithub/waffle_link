@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import { fetchUserProfile } from "../../api/user.js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RewardsSection from "../RewardSection";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -122,6 +123,7 @@ const ProfileScreen = () => {
         <View style={styles.rewardsSection}>
           <Text style={styles.sectionTitle}>Rewards</Text>
           {/* Render reward items here */}
+          <RewardsSection />
         </View>
 
         {/* Logout Button */}
@@ -147,7 +149,13 @@ const ProfileScreen = () => {
         >
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.createAccountButton}
+          onPress={() => navigation.navigate("CreateAccount")}
+        >
+          <Text style={styles.createAccountButtonText}>Create Account</Text>
+        </TouchableOpacity>
+        <RewardsSection />
         {/* Create NGO Button */}
       </View>
     );

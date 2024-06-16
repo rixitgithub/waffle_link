@@ -5,6 +5,7 @@ const API_URL = "http://10.0.2.2:4000";
 
 export const fetchUserProfile = async () => {
   try {
+    console.log("hi");
     const token = await AsyncStorage.getItem("token");
     if (token) {
       const response = await axios.get(`${API_URL}/api/users/profile`, {

@@ -51,35 +51,64 @@ router.get("/get", async (req, res) => {
   }
 });
 
-router.post("/upvote", authMiddleware, async (req, res) => {
-  const { postId } = req.body;
-  const userId = req.user._id;
-  console.log("postid", postId);
-  console.log("userId", userId);
+router.post("/upvote", async (req, res) => {
+  const { postId, userId } = req.body;
+
   try {
-    const post = await Post.findById(postId);
+    let post = await Post.findById(postId);
+
     if (!post) {
-      return res.status(404).json({ message: "Post not found." });
+      return res.status(404).send("Post not found");
     }
 
-    // Check if the user has already upvoted the post
-    if (post.upvotes.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "User has already upvoted this post." });
+    const hasUpvoted = post.upvotes.includes(userId);
+
+    if (hasUpvoted) {
+      // Remove upvote
+      post = await Post.findOneAndUpdate(
+        { _id: postId },
+        { $pull: { upvotes: userId } },
+        { new: true, runValidators: true }
+      );
+    } else {
+      // Add upvote
+      post = await Post.findOneAndUpdate(
+        { _id: postId },
+        { $push: { upvotes: userId } },
+        { new: true, runValidators: true }
+      );
     }
 
-    // Add the user's ID to the upvotes array
-    post.upvotes.push(userId);
-    await post.save();
-
-    res.status(200).json({
-      message: "Post upvoted successfully.",
-      upvotes: post.upvotes.length,
-    });
+    res.json(post);
   } catch (error) {
-    console.error("Error upvoting post:", error);
-    res.status(500).json({ message: "Internal server error." });
+    console.error(error);
+    if (error.name === "VersionError") {
+      // Retry logic for version error
+      try {
+        let post = await Post.findById(postId);
+
+        if (post.upvotes.includes(userId)) {
+          post = await Post.findOneAndUpdate(
+            { _id: postId },
+            { $pull: { upvotes: userId } },
+            { new: true, runValidators: true }
+          );
+        } else {
+          post = await Post.findOneAndUpdate(
+            { _id: postId },
+            { $push: { upvotes: userId } },
+            { new: true, runValidators: true }
+          );
+        }
+
+        return res.json(post);
+      } catch (retryError) {
+        console.error(retryError);
+        res.status(500).send("Error upvoting post");
+      }
+    } else {
+      res.status(500).send("Error upvoting post");
+    }
   }
 });
 
