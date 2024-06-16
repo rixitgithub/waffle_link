@@ -130,12 +130,6 @@ const ProfileScreen = () => {
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <FontAwesome name="sign-out" size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.createNgoButton}
-          onPress={() => navigation.navigate("CreateNGO")}
-        >
-          <Text style={styles.createNgoButtonText}>Create NGO</Text>
-        </TouchableOpacity>
       </ScrollView>
     );
   } else {
