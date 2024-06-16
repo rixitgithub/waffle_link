@@ -27,3 +27,25 @@ export const createPost = async (postData) => {
     throw error;
   }
 };
+
+export const upvotePost = async (postId) => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    const response = await axios.post(
+      `${API_URL}/api/posts/upvote`,
+      { postId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+        },
+      }
+    );
+    return response.data; // Assuming the backend returns some data
+  } catch (error) {
+    console.error("Failed to upvote:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
+};

@@ -1,8 +1,16 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  Animated,
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
 import { Post } from "./HomeScreen"; // Import Post type if needed
+import { upvotePost } from "../api/post"; // Ensure this import matches the export in api.js
 
 interface PostComponentProps {
   item: Post;
@@ -17,6 +25,40 @@ const PostComponent: React.FC<PostComponentProps> = ({
   openImageModal,
   openUserDetails,
 }) => {
+  const [upvoted, setUpvoted] = useState(false);
+  const [upvotes, setUpvotes] = useState(item.upvotes?.length ?? 0);
+  const scaleValue = new Animated.Value(1);
+
+  const handleUpvote = async () => {
+    if (upvoted) return; // Prevent multiple upvotes
+
+    // Animate the thumbs-up icon
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 1.3,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setUpvoted(true);
+    setUpvotes(upvotes + 1);
+
+    // Call the upvote function from the API file
+    try {
+      await upvotePost(item._id);
+    } catch (error) {
+      console.error(error);
+      setUpvoted(false);
+      setUpvotes(upvotes); // Revert upvotes count on error
+    }
+  };
+
   return (
     <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
       <View style={styles.userContainer}>
@@ -55,21 +97,22 @@ const PostComponent: React.FC<PostComponentProps> = ({
       )}
       <View style={styles.postStats}>
         <View style={styles.statsLeft}>
-          <FontAwesome
-            name="eye"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
+          <Pressable onPress={handleUpvote} style={styles.upvoteButton}>
+            <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+              <FontAwesome
+                name="thumbs-up"
+                size={20}
+                style={[
+                  styles.statIcon,
+                  upvoted
+                    ? { color: colors.primary }
+                    : { color: colors.inactive },
+                ]}
+              />
+            </Animated.View>
+          </Pressable>
           <Text style={[styles.statText, { color: colors.inactive }]}>
-            0 {/* Replace with actual views count */}
-          </Text>
-          <FontAwesome
-            name="heart"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            0 {/* Replace with actual likes count */}
+            {upvotes} {/* Replace with actual upvotes count */}
           </Text>
           <FontAwesome
             name="comment"
@@ -77,7 +120,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
             style={[styles.statIcon, { color: colors.inactive }]}
           />
           <Text style={[styles.statText, { color: colors.inactive }]}>
-            0 {/* Replace with actual comments count */}
+            {item.comments?.length ?? 0}{" "}
+            {/* Replace with actual comments count */}
           </Text>
         </View>
         <FontAwesome
@@ -144,6 +188,9 @@ const styles = StyleSheet.create({
   statsLeft: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  upvoteButton: {
+    marginRight: 5,
   },
   statIcon: {
     marginRight: 5,
