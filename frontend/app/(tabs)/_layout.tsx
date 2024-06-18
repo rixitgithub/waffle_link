@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
-import { Image } from "react-native";
+import { Image, View, StyleSheet } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
-
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -12,9 +11,9 @@ import OwnerStack from "../OwnerStack"; // Import OwnerStack
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [username, setUsername] = useState(null);
-  const [isOwner, setIsOwner] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -24,7 +23,10 @@ export default function TabLayout() {
           console.log(userProfile);
           if (userProfile) {
             setUsername(userProfile.username);
-            if (userProfile.profilePicture) {
+            if (
+              userProfile.profilePicture &&
+              typeof userProfile.profilePicture === "string"
+            ) {
               console.log("profile photo", userProfile.profilePicture);
               setProfilePhoto(userProfile.profilePicture);
             }
@@ -92,9 +94,8 @@ export default function TabLayout() {
                   style={{ width: 30, height: 30, borderRadius: 15 }}
                 />
               ) : (
-                <Ionicons
+                <TabBarIcon
                   name={focused ? "person" : "person-outline"}
-                  size={24}
                   color={color}
                 />
               ),
@@ -104,3 +105,17 @@ export default function TabLayout() {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  profileIconWrapper: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: "hidden",
+  },
+  profileIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+});

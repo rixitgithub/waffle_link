@@ -1,27 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Define schema for comments
-const commentSchema = new Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
-    required: true,
-  },
-  text: {
-    type: String,
-    required: true,
-  },
-  writtenAt: {
-    type: Date,
-    default: Date.now,
-  },
-  likes: {
-    type: Number,
-    default: 0,
-  },
-});
-
 // Define schema for Post
 const postSchema = new Schema({
   title: {
@@ -51,7 +30,11 @@ const postSchema = new Schema({
       ref: "User", // Reference to the User model
     },
   ],
-  comments: [commentSchema], // Array of comments
+  comments: {
+    type: Schema.Types.ObjectId,
+    ref: "User", // Assuming a User model exists with 'User' as the model name
+    required: true,
+  },
   // You can add more fields as needed
 });
 

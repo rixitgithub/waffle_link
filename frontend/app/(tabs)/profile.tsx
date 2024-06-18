@@ -143,12 +143,6 @@ const ProfileScreen = () => {
         >
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.createAccountButton}
-          onPress={() => navigation.navigate("CreateAccount")}
-        >
-          <Text style={styles.createAccountButtonText}>Create Account</Text>
-        </TouchableOpacity>
         <RewardsSection />
         {/* Create NGO Button */}
       </View>
