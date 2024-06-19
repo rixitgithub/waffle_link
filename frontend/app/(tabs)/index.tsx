@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  RefreshControl,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "@/constants/Colors";
@@ -38,6 +39,7 @@ const HomeScreen: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [campaigns, setCampaigns] = useState<Post[]>([]);
   const [viewMode, setViewMode] = useState<"posts" | "campaigns">("posts");
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -54,6 +56,12 @@ const HomeScreen: React.FC = () => {
       console.error("Error fetching posts and campaigns:", error);
       // Handle error state if needed
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPostsAndCampaignsData();
+    setRefreshing(false);
   };
 
   const openImageModal = (imageUrl: string) => {
@@ -136,6 +144,9 @@ const HomeScreen: React.FC = () => {
         renderItem={viewMode === "posts" ? renderPostItem : renderCampaignItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.feedContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
       <Modal
         isVisible={selectedImage !== null}
