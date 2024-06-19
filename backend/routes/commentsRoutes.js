@@ -2,17 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
-
-// Route to fetch all posts
-router.get("/", async (req, res) => {
-  try {
-    const posts = await Post.find().populate("createdBy", "username");
-    res.json(posts);
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+const authMiddleware = require("../middleware/authMiddleware");
 
 // Route to fetch comments for a specific post by postId
 router.get("/:postId", async (req, res) => {
@@ -32,6 +22,30 @@ router.get("/:postId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching comments:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/create", authMiddleware, async (req, res) => {
+  const { postId, comment } = req.body;
+  const userId = req.user.id;
+  console.log(postId, comment, userId);
+  try {
+    // Create a new comment instance
+    const newComment = new Comment({
+      userId,
+      postId,
+      comment,
+    });
+
+    // Save the comment to the database
+    await newComment.save();
+
+    res
+      .status(201)
+      .json({ message: "Comment created successfully", comment: newComment });
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    res.status(500).json({ message: "Failed to create comment" });
   }
 });
 
