@@ -33,7 +33,6 @@ const postSchema = new Schema({
   comments: {
     type: Schema.Types.ObjectId,
     ref: "User", // Assuming a User model exists with 'User' as the model name
-    required: true,
   },
   // You can add more fields as needed
 });

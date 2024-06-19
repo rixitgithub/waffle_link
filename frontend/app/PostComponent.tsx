@@ -10,27 +10,46 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { Post } from "./HomeScreen"; // Import Post type if needed
 import { upvotePost } from "../api/post"; // Ensure this import matches the export in api.js
+
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  images: string[];
+  createdAt: string;
+  createdBy: string;
+  upvotes: string[]; // Array of user IDs
+  comments: string[]; // Array of comment IDs
+}
 
 interface PostComponentProps {
   item: Post;
+  colors: any; // Adjust type as per your Colors definition
+  openImageModal: (imageUrl: string) => void;
+  openUserDetails: (userId: string) => void;
+  userId: string; // Assuming you have a way to pass the user's ID
 }
 
-const PostComponent: React.FC<PostComponentProps> = ({ item }) => {
+const PostComponent: React.FC<PostComponentProps> = ({
+  item,
+  colors,
+  openImageModal,
+  openUserDetails,
+  userId,
+}) => {
   const navigation = useNavigation(); // Initialize navigation
-  const [upvoted, setUpvoted] = useState(false); // Initially false as example
+  const [upvoted, setUpvoted] = useState(item.upvotes.includes(userId));
   const [upvotes, setUpvotes] = useState(item.upvotes?.length ?? 0);
   const scaleValue = useRef(new Animated.Value(1)).current;
   const rotateValue = useRef(new Animated.Value(0)).current;
   const fadeValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    console.log("item", item);
     setUpvotes(item.upvotes?.length ?? 0);
-    // Assuming logic for checking if current user has upvoted
-    // Replace this with your actual logic to check if user has upvoted
-    setUpvoted(item.upvotes?.includes("currentUserId")); // Replace "currentUserId" with actual user ID logic
-  }, [item.upvotes]);
+    setUpvoted(item.upvotes.includes(userId));
+  }, [item.upvotes, userId]);
 
   const handleUpvote = async () => {
     // Animate the thumbs-up icon
@@ -71,22 +90,23 @@ const PostComponent: React.FC<PostComponentProps> = ({ item }) => {
       ]),
     ]).start();
 
-    // Simulate toggling of upvote state
-    setUpvoted((prevUpvoted) => !prevUpvoted);
-    setUpvotes((prevUpvotes) =>
-      prevUpvoted ? prevUpvotes - 1 : prevUpvotes + 1
-    );
+    if (upvoted) {
+      setUpvoted(false);
+      setUpvotes((prevUpvotes) => prevUpvotes - 1);
+    } else {
+      setUpvoted(true);
+      setUpvotes((prevUpvotes) => prevUpvotes + 1);
+    }
 
     // Call the upvote function from the API file
     try {
       await upvotePost(item._id);
     } catch (error) {
       console.error(error);
-      // Revert upvotes count on error
       setUpvoted((prevUpvoted) => !prevUpvoted);
       setUpvotes((prevUpvotes) =>
-        prevUpvoted ? prevUpvotes + 1 : prevUpvotes - 1
-      );
+        upvoted ? prevUpvotes + 1 : prevUpvotes - 1
+      ); // Revert upvotes count on error
     }
   };
 
@@ -95,47 +115,92 @@ const PostComponent: React.FC<PostComponentProps> = ({ item }) => {
     outputRange: ["0deg", "360deg"],
   });
 
-  const openComments = (postId: string) => {
-    navigation.navigate("comments", { postId: item._id });
+  const openComments = () => {
+    navigation.navigate("comments", {
+      postId: item._id,
+    });
   };
 
   return (
-    <View style={styles.postContainer}>
-      {/* Post UI */}
-      <View style={styles.postContent}>
-        <View style={styles.userInfoContainer}>
-          <Image source={{ uri: item.userImage }} style={styles.userImage} />
-          <Text style={styles.userName}>{item.userName}</Text>
+    <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
+      <View style={styles.userContainer}>
+        <Pressable onPress={() => openUserDetails(item.createdBy)}>
+          <Image source={{ uri: item.images[0] }} style={styles.userImage} />
+        </Pressable>
+
+        <Pressable onPress={() => openUserDetails(item.createdBy)}>
+          <Text style={[styles.userName, { color: colors.text }]}>
+            {item.title}
+          </Text>
+        </Pressable>
+        <View>
+          <Text style={[styles.timeAgo, { color: colors.inactive }]}>
+            {item.createdAt} {/* Format as needed */}
+          </Text>
         </View>
-        <Text style={styles.postText}>{item.postText}</Text>
-        {/* Ensure item.postImages is defined and an array before mapping */}
-        {item.postImages && Array.isArray(item.postImages) && (
-          <Swiper style={styles.swiper}>
-            {item.postImages.map((image, index) => (
-              <View key={index}>
-                <Image source={{ uri: image }} style={styles.postImage} />
-              </View>
-            ))}
-          </Swiper>
-        )}
       </View>
-      {/* Interaction buttons */}
-      <View style={styles.interactionButtons}>
-        <Pressable onPress={handleUpvote} style={styles.button}>
-          <Animated.View
-            style={{
-              transform: [{ scale: scaleValue }, { rotate: rotateInterpolate }],
-              opacity: fadeValue,
-            }}
-          >
-            <FontAwesome name="thumbs-up" size={20} />
-          </Animated.View>
-          <Text style={styles.buttonText}>{upvotes}</Text>
-        </Pressable>
-        <Pressable onPress={() => openComments(item._id)} style={styles.button}>
-          <FontAwesome name="comment" size={20} />
-          <Text style={styles.buttonText}>{item.comments}</Text>
-        </Pressable>
+      <Text style={[styles.postText, { color: colors.text }]}>
+        {item.content}
+      </Text>
+      {item.images && item.images.length > 0 ? (
+        <Swiper style={styles.swiper}>
+          {item.images.map((image, index) => (
+            <View key={index}>
+              <Pressable onPress={() => openImageModal(image)}>
+                <Image source={{ uri: image }} style={styles.postImage} />
+              </Pressable>
+            </View>
+          ))}
+        </Swiper>
+      ) : (
+        <View style={styles.noImageContainer}>
+          <Text style={styles.noImageText}>No images available</Text>
+        </View>
+      )}
+      <View style={styles.postStats}>
+        <View style={styles.statsLeft}>
+          <Pressable onPress={handleUpvote} style={styles.upvoteButton}>
+            <Animated.View
+              style={{
+                transform: [
+                  { scale: scaleValue },
+                  { rotate: rotateInterpolate },
+                ],
+                opacity: fadeValue,
+              }}
+            >
+              <FontAwesome
+                name="thumbs-up"
+                size={20}
+                style={[
+                  styles.statIcon,
+                  upvoted
+                    ? { color: colors.primary }
+                    : { color: colors.inactive },
+                ]}
+              />
+            </Animated.View>
+          </Pressable>
+          <Text style={[styles.statText, { color: colors.inactive }]}>
+            {upvotes} {/* Display the dynamic upvotes count */}
+          </Text>
+          <Pressable onPress={openComments} style={styles.commentButton}>
+            <FontAwesome
+              name="comment"
+              size={20}
+              style={[styles.statIcon, { color: colors.inactive }]}
+            />
+            <Text style={[styles.statText, { color: colors.inactive }]}>
+              {item.comments?.length ?? 0}{" "}
+              {/* Display the dynamic comments count */}
+            </Text>
+          </Pressable>
+        </View>
+        <FontAwesome
+          name="share"
+          size={20}
+          style={[styles.shareIcon, { color: colors.inactive }]}
+        />
       </View>
     </View>
   );
@@ -143,16 +208,11 @@ const PostComponent: React.FC<PostComponentProps> = ({ item }) => {
 
 const styles = StyleSheet.create({
   postContainer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
+    marginBottom: 20,
+    borderRadius: 10,
+    padding: 15,
   },
-  postContent: {
-    marginBottom: 10,
-  },
-  userInfoContainer: {
+  userContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
@@ -167,29 +227,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  timeAgo: {
+    fontSize: 12,
+    color: "gray",
+  },
   postText: {
     fontSize: 14,
     marginBottom: 10,
-  },
-  swiper: {
-    height: 200,
   },
   postImage: {
     width: "100%",
     height: 200,
     borderRadius: 10,
   },
-  interactionButtons: {
+  noImageContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 200,
+    borderRadius: 10,
+    backgroundColor: "#eee",
+  },
+  noImageText: {
+    fontSize: 16,
+    color: "gray",
+  },
+  postStats: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
   },
-  button: {
+  statsLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
-  buttonText: {
-    marginLeft: 5,
+  upvoteButton: {
+    marginRight: 5,
+  },
+  statIcon: {
+    marginRight: 5,
+  },
+  statText: {
+    marginRight: 15,
+    fontSize: 14,
+    color: "gray",
+  },
+  commentButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  shareIcon: {},
+  swiper: {
+    height: 200,
   },
 });
 
