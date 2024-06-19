@@ -1,25 +1,11 @@
+// comments.js
+
 import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Image } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { fetchComments } from "../api/comment"; // Import the fetchComments function
 
-// Function to fetch comments based on postId
-const fetchComments = async (postId) => {
-  // Replace this with your actual API call or data fetching logic
-  // This function should return comments for the given postId
-  // For simplicity, we'll return a mock data
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const comments = [
-        { id: "1", userName: "User1", comment: "Nice post!" },
-        { id: "2", userName: "User2", comment: "Great view!" },
-        { id: "3", userName: "User3", comment: "Amazing!" },
-      ];
-      resolve(comments);
-    }, 1000);
-  });
-};
-
-const comments = ({}) => {
+const Comments = () => {
   const route = useRoute();
   const postId = route.params ? route.params.postId : null;
   const [comments, setComments] = useState([]);
@@ -28,7 +14,7 @@ const comments = ({}) => {
   useEffect(() => {
     const getComments = async () => {
       try {
-        const data = await fetchComments(postId);
+        const data = await fetchComments(postId); // Call fetchComments with postId
         setComments(data);
         setLoading(false);
       } catch (error) {
@@ -37,7 +23,9 @@ const comments = ({}) => {
       }
     };
 
-    getComments();
+    if (postId) {
+      getComments();
+    }
   }, [postId]);
 
   return (
@@ -113,4 +101,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default comments;
+export default Comments;
