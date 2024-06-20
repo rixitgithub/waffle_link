@@ -51,6 +51,7 @@ const HomeScreen: React.FC = () => {
       const { posts: fetchedPosts, campaigns: fetchedCampaigns } =
         await fetchPostsAndCampaigns();
       setPosts(fetchedPosts);
+      console.log("campagins", fetchedCampaigns);
       setCampaigns(fetchedCampaigns);
     } catch (error) {
       console.error("Error fetching posts and campaigns:", error);

@@ -11,6 +11,10 @@ const router = express.Router();
 router.post("/create", authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id; // Assuming req.user contains authenticated user's data
+    const ngo = await NGO.findOne({ owner: userId });
+    if (!ngo) {
+      return res.status(404).json({ message: "NGO not found for this user" });
+    }
     const {
       title,
       description,
@@ -37,16 +41,13 @@ router.post("/create", authMiddleware, async (req, res) => {
       shares,
       likes,
       createdBy: userId,
+      ngoId: ngo._id,
     });
 
     // Save the new Campaign to the database
     const savedCampaign = await newCampaign.save();
 
     // Find the NGO associated with the user and update its campaigns array
-    const ngo = await NGO.findOne({ owner: userId });
-    if (!ngo) {
-      return res.status(404).json({ message: "NGO not found for this user" });
-    }
 
     ngo.campaigns.push(savedCampaign._id);
     await ngo.save();
@@ -60,8 +61,14 @@ router.post("/create", authMiddleware, async (req, res) => {
 
 router.get("/get", async (req, res) => {
   try {
-    const campaigns = await Campaign.find().sort({ createdAt: -1 }); // Sort by createdAt descending
-    console.log(campaigns);
+    const campaigns = await Campaign.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt descending
+      .populate({
+        path: "ngoId", // Populate the ngoId field
+        select: "name profilePhoto category", // Select fields to populate
+      })
+      .exec();
+
     res.json(campaigns);
   } catch (error) {
     console.error("Error fetching campaigns:", error);

@@ -5,83 +5,80 @@ import { FontAwesome } from "@expo/vector-icons";
 interface CampaignComponentProps {
   item: any; // Adjust type as per your campaign data structure
   colors: any; // Adjust type as per your Colors definition
-  onJoin: (campaignId: string) => void; // Function to handle join action
-  onUpvote: (campaignId: string) => void; // Function to handle upvote action
+  onDonate?: (campaignId: string) => void; // Function to handle donate action (optional)
+  onVolunteer?: (campaignId: string) => void; // Function to handle volunteer action (optional)
 }
 
 const CampaignComponent: React.FC<CampaignComponentProps> = ({
   item,
   colors,
-  onJoin,
-  onUpvote,
+  onDonate,
+  onVolunteer,
 }) => {
-  const renderProgress = () => {
+  const renderIcon = () => {
+    let iconName = "bullhorn"; // Default icon for awareness type
+
+    if (item.type === "fundraising") {
+      iconName = "hand-holding-usd"; // Icon for fundraising type
+    } else if (item.type === "volunteer") {
+      iconName = "hand-paper"; // Icon for volunteer type
+    }
+
+    return <FontAwesome name={iconName} size={24} color="black" />;
+  };
+
+  const renderTypeLabel = () => {
+    let typeLabel = "Awareness"; // Default label for awareness type
+
+    if (item.type === "fundraising") {
+      typeLabel = "Fundraising"; // Label for fundraising type
+    } else if (item.type === "volunteer") {
+      typeLabel = "Volunteer"; // Label for volunteer type
+    }
+
+    return (
+      <View style={styles.typeLabelContainer}>
+        <Text style={styles.typeLabelText}>{typeLabel}</Text>
+      </View>
+    );
+  };
+
+  const renderButtons = () => {
     if (item.type === "fundraising") {
       return (
-        <Text style={[styles.progressText, { color: colors.text }]}>
-          Raised: {item.progress.fundraising.current}/{item.goal}{" "}
-          {item.currency}
-        </Text>
-      );
-    } else if (item.type === "awareness") {
-      return (
-        <Text style={[styles.progressText, { color: colors.text }]}>
-          Awareness: {item.progress.awareness.current} people reached
-        </Text>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.donateButton]}
+          onPress={() => onDonate && onDonate(item._id)}
+        >
+          <Text style={styles.actionButtonText}>Donate</Text>
+        </TouchableOpacity>
       );
     } else if (item.type === "volunteer") {
       return (
-        <Text style={[styles.progressText, { color: colors.text }]}>
-          Volunteers: {item.progress.volunteer.current}/{item.volunteerCount}
-        </Text>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.volunteerButton]}
+          onPress={() => onVolunteer && onVolunteer(item._id)}
+        >
+          <Text style={styles.actionButtonText}>Volunteer</Text>
+        </TouchableOpacity>
       );
     }
-    return null;
+    return null; // No buttons for awareness type or if functions are not provided
   };
 
   return (
-    <View style={[styles.campaignContainer, { backgroundColor: colors.card }]}>
-      <Text style={[styles.campaignTitle, { color: colors.text }]}>
-        {item.title}
-      </Text>
+    <View style={styles.campaignContainer}>
+      <View style={styles.header}>
+        <Text style={[styles.campaignTitle, { color: colors.text }]}>
+          {item.title}
+        </Text>
+        {renderIcon()}
+      </View>
+      {renderTypeLabel()}
       <Text style={[styles.campaignDescription, { color: colors.text }]}>
         {item.description}
       </Text>
-      {renderProgress()}
-      <View style={styles.campaignStats}>
-        <View style={styles.statsLeft}>
-          <FontAwesome
-            name="heart"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            {item.likes ?? 0}
-          </Text>
-          <FontAwesome
-            name="share"
-            size={20}
-            style={[styles.statIcon, { color: colors.inactive }]}
-          />
-          <Text style={[styles.statText, { color: colors.inactive }]}>
-            {item.shares ?? 0}
-          </Text>
-        </View>
-        <View style={styles.statsRight}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.primary }]}
-            onPress={() => onJoin(item._id)}
-          >
-            <Text style={styles.actionButtonText}>Join</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.secondary }]}
-            onPress={() => onUpvote(item._id)}
-          >
-            <Text style={styles.actionButtonText}>Upvote</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {renderButtons()}
     </View>
   );
 };
@@ -91,50 +88,56 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 10,
     padding: 15,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff", // Set a default background color
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
   },
   campaignTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    flex: 1,
   },
   campaignDescription: {
     fontSize: 14,
     marginBottom: 10,
   },
-  progressText: {
-    fontSize: 14,
+  typeLabelContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15, // Rounded corners
+    borderWidth: 1,
+    borderColor: "black",
+    alignSelf: "flex-start",
     marginBottom: 10,
   },
-  campaignStats: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  statsLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statIcon: {
-    marginRight: 5,
-  },
-  statText: {
-    marginRight: 15,
-    fontSize: 14,
-    color: "gray",
-  },
-  statsRight: {
-    flexDirection: "row",
+  typeLabelText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "black",
   },
   actionButton: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 25, // More rounded corners
+    marginTop: 10,
+    alignItems: "center",
+  },
+  donateButton: {
+    backgroundColor: "#1E90FF", // Elegant blue color for donate button
+  },
+  volunteerButton: {
+    backgroundColor: "#32CD32", // Elegant green color for volunteer button
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "white",
+    fontWeight: "600",
   },
 });
 

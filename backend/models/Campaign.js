@@ -1,4 +1,3 @@
-// Import mongoose module
 const mongoose = require("mongoose");
 
 // Define schema for Campaign
@@ -56,6 +55,11 @@ const campaignSchema = new mongoose.Schema({
     required: function () {
       return this.type === "awareness"; // Required only if type is awareness
     },
+  },
+  ngoId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "NGO", // Reference to the Post schema
+    required: true,
   },
   createdAt: {
     type: Date,

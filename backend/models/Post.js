@@ -34,6 +34,12 @@ const postSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User", // Assuming a User model exists with 'User' as the model name
   },
+  ngoId: {
+    type: Schema.Types.ObjectId,
+    ref: "NGO", // Reference to the NGO model
+    required: true,
+  },
+
   // You can add more fields as needed
 });
 
