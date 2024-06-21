@@ -58,7 +58,7 @@ const campaignSchema = new mongoose.Schema({
   },
   ngoId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "NGO", // Reference to the Post schema
+    ref: "NGO", // Reference to the NGO schema
     required: true,
   },
   createdAt: {
@@ -72,12 +72,36 @@ const campaignSchema = new mongoose.Schema({
         type: Number,
         default: 0,
       },
+      donors: [
+        {
+          user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User", // Reference to the User schema for donors
+          },
+          amount: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
     },
     volunteer: {
       currentVolunteers: {
         type: Number,
         default: 0,
       },
+      volunteer_request: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User", // Reference to the User schema for volunteer requests
+        },
+      ],
+      volunteer_recruited: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User", // Reference to the User schema for recruited volunteers
+        },
+      ],
     },
     awareness: {
       currentShares: {

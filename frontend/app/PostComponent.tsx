@@ -18,7 +18,12 @@ interface Post {
   content: string;
   images: string[];
   createdAt: string;
-  createdBy: string;
+  ngoId: {
+    _id: string;
+    name: string;
+    profilePhoto: string;
+    category: string;
+  };
   upvotes: string[]; // Array of user IDs
   comments: string[]; // Array of comment IDs
 }
@@ -46,7 +51,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
   const fadeValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    console.log("item", item);
     setUpvotes(item.upvotes?.length ?? 0);
     setUpvoted(item.upvotes.includes(userId));
   }, [item.upvotes, userId]);
@@ -124,21 +128,32 @@ const PostComponent: React.FC<PostComponentProps> = ({
   return (
     <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
       <View style={styles.userContainer}>
-        <Pressable onPress={() => openUserDetails(item.createdBy)}>
-          <Image source={{ uri: item.images[0] }} style={styles.userImage} />
+        <Pressable onPress={() => openUserDetails(item.ngoId?._id)}>
+          <Image
+            source={{ uri: item.ngoId?.profilePhoto }}
+            style={styles.userImage}
+          />
         </Pressable>
 
-        <Pressable onPress={() => openUserDetails(item.createdBy)}>
-          <Text style={[styles.userName, { color: colors.text }]}>
-            {item.title}
+        <View style={styles.userInfo}>
+          <Pressable onPress={() => openUserDetails(item.ngoId._id)}>
+            <Text style={[styles.userName, { color: colors.text }]}>
+              {item.ngoId?.name}
+            </Text>
+          </Pressable>
+          <Text style={[styles.userCategory, { color: colors.inactive }]}>
+            {item.ngoId?.category}
           </Text>
-        </Pressable>
+        </View>
         <View>
           <Text style={[styles.timeAgo, { color: colors.inactive }]}>
             {item.createdAt} {/* Format as needed */}
           </Text>
         </View>
       </View>
+      <Text style={[styles.postText, { color: colors.text }]}>
+        {item.title}
+      </Text>
       <Text style={[styles.postText, { color: colors.text }]}>
         {item.content}
       </Text>
@@ -223,9 +238,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
+  userInfo: {
+    flex: 1,
+  },
   userName: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  userCategory: {
+    fontSize: 12,
   },
   timeAgo: {
     fontSize: 12,
