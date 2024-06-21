@@ -32,3 +32,28 @@ export const createCampaign = async (campaignData) => {
     throw error;
   }
 };
+
+export const sendVolunteerRequest = async (requestData) => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/api/campaigns/send_volunteer_request`,
+      requestData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Include authorization header with token
+        },
+      }
+    );
+    console.log("message", response.data.message);
+    return response.data.message;
+  } catch (error) {
+    console.error("Error sending request", error);
+    throw error;
+  }
+};

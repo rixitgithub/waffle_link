@@ -10,28 +10,45 @@ import {
   Button,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { sendVolunteerRequest } from "../api/campaign"; // Import your sendVolunteerRequest function
 
 interface Campaign {
   _id: string;
   title: string;
   description: string;
   type: string;
-  goal: number;
-  currency: string;
+  goal?: number; // Optional for non-fundraising types
+  currency?: string; // Optional for non-fundraising types
   endDate: string;
-  volunteerCount: number | null;
-  skills: string[];
-  shares: number | null;
-  likes: number | null;
+  volunteerCount?: number | null; // Optional for non-volunteer types
+  skills?: string[]; // Optional for non-volunteer types
+  shares?: number | null; // Optional for non-awareness types
+  likes?: number | null; // Optional for non-awareness types
   ngoId: {
     category: string;
     name: string;
     profilePhoto: string;
   };
   progress: {
-    awareness: { currentShares: number; currentLikes: number };
-    fundraising: { currentAmount: number };
-    volunteer: { currentVolunteers: number };
+    awareness?: {
+      currentShares: number;
+      currentLikes: number;
+    }; // Optional for non-awareness types
+    fundraising?: {
+      currentAmount: number;
+      donors?: {
+        user: string; // Reference to User _id (ObjectId as string)
+        amount: number;
+      }[];
+    }; // Optional for non-fundraising types
+    volunteer?: {
+      currentVolunteers: number;
+      volunteer_request?: {
+        user: string; // Reference to User _id (ObjectId as string)
+        text: string;
+      }[];
+      volunteer_recruited?: string[]; // Array of User _ids (ObjectIds as strings)
+    }; // Optional for non-volunteer types
   };
 }
 
@@ -49,6 +66,8 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
   onVolunteer,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [volunteerText, setVolunteerText] = useState("");
 
   const renderTypeLabel = () => {
@@ -86,7 +105,7 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
   const renderDetails = () => {
     if (item.type === "fundraising") {
       const progressPercentage =
-        (item.progress.fundraising.currentAmount / item.goal) * 100;
+        (item.progress.fundraising?.currentAmount / item.goal!) * 100;
 
       return (
         <View style={styles.detailsContainer}>
@@ -96,7 +115,7 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           </Text>
           <Text style={[styles.raisedText, { color: colors.primary }]}>
             <Text style={styles.detailLabel}>Raised: </Text>
-            {item.currency} {item.progress.fundraising.currentAmount}
+            {item.currency} {item.progress.fundraising?.currentAmount}
           </Text>
           <View style={styles.progressBarContainer}>
             <View
@@ -120,9 +139,9 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           </Text>
           <Text style={[styles.detailText, { color: colors.text }]}>
             <Text style={styles.detailLabel}>Current Volunteers: </Text>
-            {item.progress.volunteer.currentVolunteers}
+            {item.progress.volunteer?.currentVolunteers}
           </Text>
-          {item.skills.length > 0 && (
+          {item.skills && item.skills.length > 0 && (
             <View style={styles.skillsContainer}>
               <Text style={[styles.detailText, { color: colors.text }]}>
                 Skills Required:
@@ -143,11 +162,11 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
         <View style={styles.detailsContainer}>
           <Text style={[styles.detailText, { color: colors.text }]}>
             <Text style={styles.detailLabel}>Shares: </Text>
-            {item.progress.awareness.currentShares}
+            {item.progress.awareness?.currentShares}
           </Text>
           <Text style={[styles.detailText, { color: colors.text }]}>
             <Text style={styles.detailLabel}>Likes: </Text>
-            {item.progress.awareness.currentLikes}
+            {item.progress.awareness?.currentLikes}
           </Text>
         </View>
       );
@@ -177,9 +196,33 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
     return null; // No buttons for awareness type or if functions are not provided
   };
 
-  const handleVolunteerSubmit = () => {
-    console.log("Volunteer Text:", volunteerText);
-    setModalVisible(false);
+  const handleVolunteerSubmit = async () => {
+    if (volunteerText.trim() === "") {
+      // Optionally handle empty volunteer text
+      return;
+    }
+
+    const requestData = {
+      campaignId: item._id,
+      text: volunteerText,
+    };
+
+    try {
+      const newUser = await sendVolunteerRequest(requestData);
+      console.log("User created:", newUser);
+      setModalVisible(false);
+      setShowSuccessMessage(true);
+      setSuccessMessage("Submitted successfully!!!");
+
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage("");
+      }, 3000);
+      // Optionally, perform any additional actions upon successful volunteer submission
+    } catch (error) {
+      console.error("Error creating user:", error.message);
+      // Optionally, handle and display the error message to the user
+    }
   };
 
   return (
@@ -237,6 +280,11 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           </View>
         </View>
       </Modal>
+      {showSuccessMessage && (
+        <View style={styles.successMessageContainer}>
+          <Text style={styles.successMessageText}>{successMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -260,87 +308,64 @@ const styles = StyleSheet.create({
   campaignTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    flex: 1,
   },
   campaignDescription: {
-    fontSize: 14,
     marginBottom: 10,
-  },
-  typeLabelContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15, // Rounded corners
-    alignSelf: "flex-end",
-  },
-  typeLabelText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "white",
-  },
-  actionButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 25, // More rounded corners
-    marginTop: 10,
-    alignItems: "center",
-  },
-  donateButton: {
-    backgroundColor: "#1E90FF", // Elegant blue color for donate button
-  },
-  volunteerButton: {
-    backgroundColor: "#32CD32", // Elegant green color for volunteer button
-  },
-  actionButtonText: {
-    fontSize: 16,
-    color: "white",
-    fontWeight: "600",
   },
   ngoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    marginBottom: 10,
   },
   ngoImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     marginRight: 10,
   },
   ngoDetails: {
     flex: 1,
   },
   ngoName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
   },
   ngoCategory: {
+    fontSize: 14,
+    fontStyle: "italic",
+  },
+  typeLabelContainer: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    alignSelf: "flex-start",
+  },
+  typeLabelText: {
+    fontWeight: "bold",
     fontSize: 12,
+    textTransform: "uppercase",
   },
   detailsContainer: {
     marginBottom: 10,
   },
   detailText: {
-    fontSize: 14,
     marginBottom: 5,
-  },
-  raisedText: {
-    fontSize: 16,
-    fontWeight: "bold",
   },
   detailLabel: {
     fontWeight: "bold",
   },
+  raisedText: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
   progressBarContainer: {
     height: 10,
-    width: "100%",
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#f2f2f2",
     borderRadius: 5,
     overflow: "hidden",
-    marginTop: 5,
   },
   progressBar: {
     height: "100%",
-    borderRadius: 5,
   },
   skillsContainer: {
     marginTop: 10,
@@ -348,17 +373,37 @@ const styles = StyleSheet.create({
   skillsTagContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    marginTop: 5,
   },
   skillTag: {
-    backgroundColor: "#e0e0e0",
-    borderRadius: 15,
+    backgroundColor: "#e6e6e6",
+    borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    margin: 5,
+    marginRight: 5,
+    marginBottom: 5,
   },
   skillTagText: {
     fontSize: 12,
-    color: "#333",
+  },
+  actionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  donateButton: {
+    backgroundColor: "#1E90FF",
+  },
+  volunteerButton: {
+    backgroundColor: "#32CD32",
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   centeredView: {
     flex: 1,
@@ -367,10 +412,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -378,28 +422,40 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
+    minWidth: 300,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
+    marginBottom: 10,
   },
   textInput: {
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
     width: "100%",
-    marginBottom: 20,
   },
   modalButtonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     width: "100%",
+  },
+  successMessageContainer: {
+    backgroundColor: "rgba(0, 255, 0, 0.9)", // Green color for success message background
+    padding: 10,
+    marginTop: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  successMessageText: {
+    color: "#fff", // White text color for success message
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

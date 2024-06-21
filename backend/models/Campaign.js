@@ -92,8 +92,14 @@ const campaignSchema = new mongoose.Schema({
       },
       volunteer_request: [
         {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // Reference to the User schema for volunteer requests
+          user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User", // Reference to the User schema for donors
+          },
+          text: {
+            type: String,
+            required: true,
+          },
         },
       ],
       volunteer_recruited: [

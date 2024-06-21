@@ -76,4 +76,51 @@ router.get("/get", async (req, res) => {
   }
 });
 
+router.post("/send_volunteer_request", authMiddleware, async (req, res) => {
+  const { campaignId, text } = req.body;
+  const userId = req.user.id; // Assuming authMiddleware sets req.user with user ID
+
+  try {
+    // Find the campaign by campaignId
+    const campaign = await Campaign.findById(campaignId);
+
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+
+    // Check if campaign type is "volunteer"
+    if (campaign.type !== "volunteer") {
+      return res
+        .status(400)
+        .json({ error: "Campaign is not a volunteer type" });
+    }
+
+    // Check if user has already volunteered
+    const alreadyVolunteered =
+      campaign.progress.volunteer.volunteer_request.some(
+        (request) => request.user.toString() === userId
+      );
+
+    if (alreadyVolunteered) {
+      return res
+        .status(400)
+        .json({ error: "You have already volunteered for this campaign" });
+    }
+
+    // Add the volunteer request to the campaign
+    campaign.progress.volunteer.volunteer_request.push({
+      user: userId,
+      text,
+    });
+
+    // Save the updated campaign
+    await campaign.save();
+
+    res.status(200).json({ message: "Volunteer request sent successfully" });
+  } catch (err) {
+    console.error("Error volunteering for campaign:", err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 module.exports = router;
