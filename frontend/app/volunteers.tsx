@@ -6,9 +6,12 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome"; // Import the icon library
 
 export default function Volunteers() {
-  // Dummy data for volunteers
+  const navigation = useNavigation();
+
   const [volunteers, setVolunteers] = useState([
     { id: "1", name: "John Doe" },
     { id: "2", name: "Jane Smith" },
@@ -18,6 +21,12 @@ export default function Volunteers() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => navigation.navigate("VolunteerRequests")}
+      >
+        <Icon name="envelope" size={24} color="#000" />
+      </TouchableOpacity>
       <FlatList
         data={volunteers}
         renderItem={({ item }) => (
@@ -43,5 +52,11 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 8,
     marginBottom: 16,
+  },
+  iconButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 1,
   },
 });

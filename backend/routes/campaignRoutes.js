@@ -123,4 +123,35 @@ router.post("/send_volunteer_request", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/volunteer-requests", async (req, res) => {
+  try {
+    const campaigns = await Campaign.find({ type: "volunteer" })
+      .populate("ngoId")
+      .populate({
+        path: "progress.volunteer.volunteer_request.user",
+        model: "User",
+      });
+
+    const campaignRequests = campaigns.map((campaign) => ({
+      campaign: {
+        _id: campaign._id,
+        title: campaign.title,
+        description: campaign.description,
+        ngo: campaign.ngoId,
+      },
+      requests: campaign.progress.volunteer.volunteer_request.map(
+        (request) => ({
+          user: request.user,
+          text: request.text,
+        })
+      ),
+    }));
+
+    res.json(campaignRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
