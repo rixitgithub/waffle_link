@@ -1,49 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
+  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { getVolunteerRequest } from "../api/campaign"; // Adjust the import path as needed
 
 export default function VolunteerRequests() {
-  // Dummy data for volunteer requests
-  const [requests, setRequests] = useState([
-    {
-      id: "1",
-      name: "Michael Scott",
-      request: "Looking to volunteer for marketing.",
-    },
-    {
-      id: "2",
-      name: "Pam Beesly",
-      request: "Interested in art and design volunteering.",
-    },
-    {
-      id: "3",
-      name: "Jim Halpert",
-      request: "Wants to volunteer for event planning.",
-    },
-    {
-      id: "4",
-      name: "Dwight Schrute",
-      request: "Available for security and organizational work.",
-    },
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const data = await getVolunteerRequest();
+        setRequests(data);
+      } catch (error) {
+        console.error("Error fetching volunteer requests", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
+
+  const handleAccept = (campaignId, userId) => {
+    // Handle accept logic here
+    console.log(
+      `Accepted request for campaign ${campaignId} and user ${userId}`
+    );
+  };
+
+  const handleReject = (campaignId, userId) => {
+    // Handle reject logic here
+    console.log(
+      `Rejected request for campaign ${campaignId} and user ${userId}`
+    );
+  };
+
+  const renderRequestItem = ({ item }) => (
+    <View style={styles.requestItem}>
+      <Text style={styles.campaignTitle}>{item.campaign.title}</Text>
+      <Text style={styles.ngoName}>{item.campaign.ngo.name}</Text>
+      {item.requests.map((request, index) => (
+        <View key={index} style={styles.userRequest}>
+          <Text style={styles.requestName}>{request.user.name}</Text>
+          <Text style={styles.requestText}>{request.text}</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.acceptButton]}
+              onPress={() => handleAccept(item.campaign._id, request.user._id)}
+            >
+              <Text style={styles.buttonText}>Accept</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.rejectButton]}
+              onPress={() => handleReject(item.campaign._id, request.user._id)}
+            >
+              <Text style={styles.buttonText}>Reject</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={requests}
-        renderItem={({ item }) => (
-          <View style={styles.requestItem}>
-            <Text style={styles.requestName}>{item.name}</Text>
-            <Text style={styles.requestText}>{item.request}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={requests}
+          renderItem={renderRequestItem}
+          keyExtractor={(item) => item.campaign._id}
+        />
+      )}
     </View>
   );
 }
@@ -62,12 +98,48 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#f9f9f9",
   },
+  campaignTitle: {
+    fontWeight: "bold",
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  ngoName: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 8,
+  },
+  userRequest: {
+    marginBottom: 12,
+  },
   requestName: {
     fontWeight: "bold",
     fontSize: 16,
+    color: "#333",
+    marginBottom: 4,
   },
   requestText: {
-    marginTop: 8,
     fontSize: 14,
+    color: "#555",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 8,
+  },
+  button: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 5,
+    marginHorizontal: 8,
+  },
+  acceptButton: {
+    backgroundColor: "#32CD32", // Green color for accept button
+  },
+  rejectButton: {
+    backgroundColor: "#FF6347", // Red color for reject button
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
