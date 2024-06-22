@@ -50,3 +50,14 @@ export const fetchNGODetails = async () => {
     throw error;
   }
 };
+export const fetchNGOs = async () => {
+  try {
+    // Fetch NGO details using Axios directly
+    const response = await axios.get(`${API_URL}/api/ngo/fetch`);
+    console.log("ngos", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching NGO details:", error);
+    throw error;
+  }
+};

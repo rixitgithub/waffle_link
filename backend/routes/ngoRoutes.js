@@ -47,7 +47,8 @@ router.get("/details", authMiddleware, async (req, res) => {
 
 router.get("/fetch", async (req, res) => {
   try {
-    const ngos = await NGO.find();
+    const ngos = await Ngo.find();
+    console.log("ngos", ngos);
     res.status(200).json(ngos);
   } catch (err) {
     res

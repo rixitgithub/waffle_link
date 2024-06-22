@@ -12,27 +12,9 @@ import {
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useNavigation } from "@react-navigation/native";
+import { fetchNGOs } from "../../api/ngo"; // Import the fetch function
 
-// Mock data for communities (replace with actual data)
-const mockCommunities = [
-  {
-    id: 1,
-    name: "Community 1",
-    description: "Description of Community 1",
-    category: "Health",
-    image: "https://via.placeholder.com/150", // Add image URL
-  },
-  {
-    id: 2,
-    name: "Community 2",
-    description: "Description of Community 2",
-    category: "Education",
-    image: "https://via.placeholder.com/150", // Add image URL
-  },
-  // Add more community objects as needed
-];
-
-// Mock data for categories (replace with actual data)
+// Categories array
 const categories = [
   { id: "all", name: "All" },
   { id: "health", name: "Health" },
@@ -64,37 +46,54 @@ const CommunityScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [selectedCategory, setSelectedCategory] = useState("all"); // State for selected category
-  const [communities, setCommunities] = useState([]); // State for communities
+  const [communities, setCommunities] = useState([]); // State for all communities
+  const [filteredCommunities, setFilteredCommunities] = useState([]); // State for filtered communities
   const [loading, setLoading] = useState(true); // State for loading indicator
 
   useEffect(() => {
-    // Simulate fetching communities from an API (replace with actual API call)
-    setTimeout(() => {
-      setCommunities(mockCommunities);
-      setLoading(false);
-    }, 1000);
+    // Fetch communities from API
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const ngos = await fetchNGOs();
+        setCommunities(ngos);
+        setFilteredCommunities(ngos); // Initialize filtered data with all NGOs
+      } catch (error) {
+        console.error("Error fetching NGOs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSearch = () => {
     // Filter communities based on search query and selected category
-    let filteredCommunities = mockCommunities.filter((community) =>
-      community.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    let filteredData = communities;
+
+    // First filter based on selected category
     if (selectedCategory !== "all") {
-      filteredCommunities = filteredCommunities.filter(
+      filteredData = filteredData.filter(
         (community) => community.category.toLowerCase() === selectedCategory
       );
     }
-    setCommunities(filteredCommunities);
+
+    // Then filter based on search query
+    filteredData = filteredData.filter((community) =>
+      community.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    setFilteredCommunities(filteredData);
   };
 
   useEffect(() => {
     handleSearch();
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
-  const handleCommunityPress = (userId) => {
-    // Navigate to the user details screen and pass the community id as a parameter
-    navigation.navigate("UserDetailsScreen", { userId });
+  const handleCommunityPress = (id: string) => {
+    // Navigate to the NGO details screen and pass the NGO id as a parameter
+    navigation.navigate("UserDetailsScreen", { id });
   };
 
   return (
@@ -109,7 +108,7 @@ const CommunityScreen = () => {
             borderColor: colors.border,
           },
         ]}
-        placeholder="Search Communities"
+        placeholder="Search NGOs"
         placeholderTextColor={colors.inactive}
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -155,34 +154,42 @@ const CommunityScreen = () => {
         />
       )}
 
-      {/* List of Communities */}
+      {/* List of NGOs */}
       {!loading && (
         <FlatList
-          data={communities}
-          keyExtractor={(item) => item.id.toString()}
+          data={filteredCommunities}
+          keyExtractor={(item) => item._id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
-                styles.communityItem,
+                styles.ngoItem,
                 {
-                  backgroundColor: colors.background,
+                  backgroundColor: colors.cardBackground,
                   borderColor: colors.border,
                 },
               ]}
-              onPress={() => handleCommunityPress(item.id)}
+              onPress={() => handleCommunityPress(item._id.toString())}
             >
               <Image
-                source={{ uri: item.image }}
-                style={styles.communityImage}
+                source={{ uri: item.profilePhoto }}
+                style={styles.ngoImage}
               />
-              <View style={styles.communityTextContainer}>
-                <Text style={[styles.communityName, { color: colors.text }]}>
+              <View style={styles.ngoTextContainer}>
+                <Text style={[styles.ngoName, { color: colors.text }]}>
                   {item.name}
                 </Text>
-                <Text
-                  style={[styles.communityDescription, { color: colors.text }]}
-                >
-                  {item.description}
+                <Text style={[styles.ngoCategory, { color: colors.text }]}>
+                  Category: {item.category}
+                </Text>
+                <Text style={[styles.ngoDescription, { color: colors.text }]}>
+                  Mission: {item.missionStatement}
+                </Text>
+                <Text style={[styles.ngoContact, { color: colors.text }]}>
+                  Contact: {item.contactInfo}
+                </Text>
+                <Text style={[styles.ngoEstablished, { color: colors.text }]}>
+                  Established:{" "}
+                  {new Date(item.establishedDate).toLocaleDateString()}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -206,7 +213,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   filterContainer: {
-    marginBottom: 10, // Adjust the margin bottom here
+    marginBottom: 10,
   },
   categoryFilterContainer: {
     alignItems: "center",
@@ -219,38 +226,45 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
-    borderColor: Colors.border,
-    backgroundColor: Colors.background,
   },
   filterButtonText: {
     fontSize: 12,
-    color: Colors.text,
   },
   loader: {
     marginTop: 20,
   },
-  communityItem: {
+  ngoItem: {
     flexDirection: "row",
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
   },
-  communityImage: {
+  ngoImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
   },
-  communityTextContainer: {
+  ngoTextContainer: {
+    flex: 1,
     justifyContent: "center",
   },
-  communityName: {
+  ngoName: {
     fontWeight: "bold",
     fontSize: 16,
   },
-  communityDescription: {
-    color: Colors.text,
+  ngoCategory: {
+    fontSize: 14,
+  },
+  ngoDescription: {
+    fontSize: 14,
+  },
+  ngoContact: {
+    fontSize: 14,
+  },
+  ngoEstablished: {
+    fontSize: 14,
   },
 });
 

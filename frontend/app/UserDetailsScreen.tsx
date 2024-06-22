@@ -12,14 +12,14 @@ import { useRoute } from "@react-navigation/native";
 import UserPost from "./UserPost"; // Import the UserPost component
 
 // Function to fetch user details based on userId
-const fetchUserDetails = async (userId) => {
+const fetchUserDetails = async (id) => {
   // Replace this with your actual API call or data fetching logic
   // This function should return user details including posts
   // For simplicity, we'll return a mock data
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const userDetails = {
-        id: userId,
+        id: id,
         name: "John Doe",
         email: "john.doe@example.com",
         bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -58,7 +58,7 @@ const fetchUserDetails = async (userId) => {
 
 const UserDetailsScreen = () => {
   const route = useRoute();
-  const userId = route.params ? route.params.userId : null;
+  const userId = route.params ? route.params.id : null;
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 

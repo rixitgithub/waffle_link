@@ -69,8 +69,8 @@ const HomeScreen: React.FC = () => {
     setSelectedImage(imageUrl);
   };
 
-  const openUserDetails = (userId: string) => {
-    navigation.navigate("UserDetailsScreen", { userId });
+  const openUserDetails = (id: string) => {
+    navigation.navigate("UserDetailsScreen", { id });
   };
 
   const renderPostItem = ({ item }: { item: Post }) => (
