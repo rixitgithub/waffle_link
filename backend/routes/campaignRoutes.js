@@ -250,15 +250,19 @@ router.get("/campaign/titles", authMiddleware, async (req, res) => {
     const ngoId = ngo._id; // Assuming ngo._id is the ObjectId of the NGO owned by the user
 
     // Find campaigns where ngoId matches the NGO owned by the user
-    const campaigns = await Campaign.find({ ngoId }).select("title");
+    const campaigns = await Campaign.find({ ngoId }).select("title _id");
 
     if (!campaigns || campaigns.length === 0) {
       return res.status(404).json({ error: "No campaigns found for this NGO" });
     }
 
-    // Extract titles from campaigns and send as response
-    const campaignTitles = campaigns.map((campaign) => campaign.title);
-    res.json({ campaignTitles });
+    // Extract titles and IDs from campaigns and send as response
+    const campaignData = campaigns.map((campaign) => ({
+      id: campaign._id,
+      title: campaign.title,
+    }));
+    console.log({ campaigns: campaignData });
+    res.json({ campaigns: campaignData });
   } catch (error) {
     console.error("Error fetching campaign titles:", error);
     res.status(500).json({ error: "Internal Server Error" });
