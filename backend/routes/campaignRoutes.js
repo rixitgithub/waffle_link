@@ -154,4 +154,48 @@ router.get("/volunteer-requests", async (req, res) => {
   }
 });
 
+router.post("/volunteer-request-action", authMiddleware, async (req, res) => {
+  const { campaignId, userId, actionType } = req.body;
+
+  try {
+    // Find the campaign
+    const campaign = await Campaign.findById(campaignId);
+
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    // Find the index of the volunteer request in the campaign
+    const requestIndex =
+      campaign.progress.volunteer.volunteer_request.findIndex(
+        (request) => request.user.toString() === userId
+      );
+
+    if (requestIndex === -1) {
+      return res.status(404).json({ message: "Volunteer request not found" });
+    }
+
+    // Handle accept/reject logic
+    if (actionType === "accept") {
+      // Add user to volunteer_recruited
+      campaign.progress.volunteer.volunteer_recruited.push(userId);
+      // Remove user from volunteer_request
+      campaign.progress.volunteer.volunteer_request.splice(requestIndex, 1);
+    } else if (actionType === "reject") {
+      // Remove user from volunteer_request
+      campaign.progress.volunteer.volunteer_request.splice(requestIndex, 1);
+    } else {
+      return res.status(400).json({ message: "Invalid action type" });
+    }
+
+    // Save the campaign with updated request status
+    await campaign.save();
+
+    res.json({ message: `Request ${actionType}ed successfully` });
+  } catch (error) {
+    console.error("Error handling volunteer request action", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;

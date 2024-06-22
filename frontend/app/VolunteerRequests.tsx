@@ -7,7 +7,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getVolunteerRequest } from "../api/campaign"; // Adjust the import path as needed
+import {
+  getVolunteerRequest,
+  sendVolunteerRequestAction,
+} from "../api/campaign"; // Adjust the import path as needed
 
 export default function VolunteerRequests() {
   const [requests, setRequests] = useState([]);
@@ -28,18 +31,26 @@ export default function VolunteerRequests() {
     fetchRequests();
   }, []);
 
-  const handleAccept = (campaignId, userId) => {
-    // Handle accept logic here
-    console.log(
-      `Accepted request for campaign ${campaignId} and user ${userId}`
-    );
-  };
-
-  const handleReject = (campaignId, userId) => {
-    // Handle reject logic here
-    console.log(
-      `Rejected request for campaign ${campaignId} and user ${userId}`
-    );
+  const handleAction = async (campaignId, userId, actionType) => {
+    try {
+      await sendVolunteerRequestAction(campaignId, userId, actionType);
+      // Update the state to remove the processed request
+      setRequests((prevRequests) => {
+        return prevRequests.map((item) => {
+          if (item.campaign._id === campaignId) {
+            return {
+              ...item,
+              requests: item.requests.filter(
+                (request) => request.user._id !== userId
+              ),
+            };
+          }
+          return item;
+        });
+      });
+    } catch (error) {
+      console.error(`Error ${actionType}ing volunteer request`, error);
+    }
   };
 
   const renderRequestItem = ({ item }) => (
@@ -53,13 +64,17 @@ export default function VolunteerRequests() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.acceptButton]}
-              onPress={() => handleAccept(item.campaign._id, request.user._id)}
+              onPress={() =>
+                handleAction(item.campaign._id, request.user._id, "accept")
+              }
             >
               <Text style={styles.buttonText}>Accept</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.rejectButton]}
-              onPress={() => handleReject(item.campaign._id, request.user._id)}
+              onPress={() =>
+                handleAction(item.campaign._id, request.user._id, "reject")
+              }
             >
               <Text style={styles.buttonText}>Reject</Text>
             </TouchableOpacity>
