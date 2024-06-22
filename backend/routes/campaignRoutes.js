@@ -179,6 +179,7 @@ router.post("/volunteer-request-action", authMiddleware, async (req, res) => {
     if (actionType === "accept") {
       // Add user to volunteer_recruited
       campaign.progress.volunteer.volunteer_recruited.push(userId);
+      campaign.progress.volunteer.currentVolunteers += 1;
       // Remove user from volunteer_request
       campaign.progress.volunteer.volunteer_request.splice(requestIndex, 1);
     } else if (actionType === "reject") {
@@ -199,20 +200,21 @@ router.post("/volunteer-request-action", authMiddleware, async (req, res) => {
 });
 
 router.get("/volunteer-recruited", authMiddleware, async (req, res) => {
-  const { userId } = req.user.id;
+  const userId = req.user.id;
 
   try {
+    console.log("userId", userId);
     // Find the NGO by owner's userId
-    const ngo = await Ngo.findOne({ owner: userId });
+    const ngo = await NGO.findOne({ owner: userId });
     if (!ngo) {
       return res.status(404).json({ message: "NGO not found for this owner" });
     }
 
     // Find campaigns of this NGO with type 'volunteer'
     const campaigns = await Campaign.find({ ngoId: ngo._id, type: "volunteer" })
-      .populate("volunteer_recruited", "name email") // Populate recruited volunteers details
+      .populate("progress.volunteer.volunteer_recruited", "name email") // Populate recruited volunteers details
       .exec();
-
+    console.log("campaigns", campaigns);
     res.json(campaigns);
   } catch (error) {
     console.error("Error fetching campaigns by NGO owner", error);
