@@ -57,4 +57,24 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
+router.post("/fetchById", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Find the NGO by ID and populate posts and campaigns
+    const ngo = await Ngo.findById(id)
+      .populate("posts") // Assuming 'posts' is the field in your Ngo schema that references Post documents
+      .populate("campaigns"); // Assuming 'campaigns' is the field in your Ngo schema that references Campaign documents
+
+    if (!ngo) {
+      return res.status(404).json({ error: "NGO not found" });
+    }
+
+    res.status(200).json(ngo);
+  } catch (error) {
+    console.error("Error fetching NGO details:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
