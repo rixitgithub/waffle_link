@@ -6,7 +6,6 @@ import {
   Image,
   ScrollView,
   Modal,
-  TouchableHighlight,
   TouchableOpacity,
   Linking,
   Alert,
@@ -33,6 +32,17 @@ const impactInvestorBadgeImages = [
 // Lock icon image
 const lockIcon = require("../assets/images/locked.png");
 
+// Share icons for different platforms
+const shareIcons = {
+  whatsapp: require("../assets/images/whatsapp.png"),
+  facebook: require("../assets/images/facebook.png"),
+  twitter: require("../assets/images/twitter.png"),
+  linkedin: require("../assets/images/linkedin.png"),
+  telegram: require("../assets/images/telegram.png"),
+  email: require("../assets/images/gmail.png"),
+};
+
+// Example data for event attender and impact investor badges
 const eventAttenderBadges = [
   {
     image: eventAttenderBadgeImages[0],
@@ -112,87 +122,141 @@ const RewardsSection = () => {
     setModalVisible(false);
   };
 
-  const shareBadge = async () => {
-    if (!selectedBadge) return;
+  const handleShare = async (badge) => {
+    try {
+      if (!badge) {
+        console.error("Badge is missing.");
+        return;
+      }
 
-    const { name, level } = selectedBadge;
-    const message = `Check out my ${name} (${level}) on WaffleApp!`;
+      const { name, level } = badge;
+      const message = `Check out my ${name} (${level}) on WaffleApp!`;
 
-    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
-
-    const canOpen = await Linking.canOpenURL(url);
-
-    if (!canOpen) {
-      Alert.alert(
-        "WhatsApp Not Installed",
-        "WhatsApp is required to share badges. Please install WhatsApp to share.",
-        [{ text: "OK", onPress: () => {} }]
-      );
-      return;
+      // Display modal to share badge
+      setSelectedBadge(badge);
+      setModalVisible(true);
+    } catch (error) {
+      console.error("Error handling share:", error);
     }
+  };
 
-    Linking.openURL(url).catch((err) =>
-      console.error("Error opening WhatsApp:", err)
-    );
+  const shareToApp = async (app) => {
+    try {
+      let url = "";
+      let appName = "";
+
+      switch (app) {
+        case "whatsapp":
+          url = `whatsapp://send?text=${encodeURIComponent(
+            selectedBadge.name + " - " + selectedBadge.level
+          )}`;
+          appName = "WhatsApp";
+          break;
+        case "facebook":
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            "https://yourwebsite.com"
+          )}`;
+          appName = "Facebook";
+          break;
+        case "twitter":
+          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+            selectedBadge.name + " - " + selectedBadge.level
+          )}`;
+          appName = "Twitter";
+          break;
+        case "linkedin":
+          url = `https://www.linkedin.com/shareArticle?url=${encodeURIComponent(
+            "https://yourwebsite.com"
+          )}&title=${encodeURIComponent(
+            selectedBadge.name
+          )}&summary=${encodeURIComponent(selectedBadge.level)}`;
+          appName = "LinkedIn";
+          break;
+        case "telegram":
+          url = `https://telegram.me/share/url?url=${encodeURIComponent(
+            "https://yourwebsite.com"
+          )}&text=${encodeURIComponent(
+            selectedBadge.name + " - " + selectedBadge.level
+          )}`;
+          appName = "Telegram";
+          break;
+        case "email":
+          url = `mailto:?subject=${encodeURIComponent(
+            "Check out my badge on WaffleApp!"
+          )}&body=${encodeURIComponent(
+            selectedBadge.name + " - " + selectedBadge.level
+          )}`;
+          appName = "Email";
+          break;
+        default:
+          return;
+      }
+
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) {
+        Alert.alert(
+          `${appName} Not Installed`,
+          `${appName} is required to share badges. Please install ${appName} to share.`,
+          [{ text: "OK", onPress: () => {} }]
+        );
+        return;
+      }
+
+      Linking.openURL(url).catch((err) =>
+        console.error(`Error opening ${appName}:`, err)
+      );
+    } catch (error) {
+      console.error("Error sharing to app:", error);
+    }
   };
 
   return (
     <ScrollView style={styles.container}>
+      {/* Event Attender Section */}
       <SectionHeader title="Event Attender" />
       <View style={styles.badgesContainer}>
         {eventAttenderBadges.map((badge, index) => (
-          <TouchableHighlight
+          <TouchableOpacity
             key={index}
-            style={styles.badgeWrapper}
-            underlayColor="transparent"
+            style={[
+              styles.badgeWrapper,
+              badge.locked ? styles.lockedBadge : null,
+            ]}
             onPress={() => handleBadgePress(badge)}
           >
-            <View>
-              <Image
-                source={badge.image}
-                style={[
-                  styles.badgeImage,
-                  badge.locked ? styles.lockedBadge : null,
-                ]}
-              />
-              {badge.locked && (
-                <Image source={lockIcon} style={styles.lockIcon} />
-              )}
-              <Text style={styles.badgeLabel}>{badge.name}</Text>
-              <Text style={styles.badgeLevel}>{badge.level}</Text>
-            </View>
-          </TouchableHighlight>
+            <Image source={badge.image} style={styles.badgeImage} />
+            {badge.locked && (
+              <Image source={lockIcon} style={styles.lockIcon} />
+            )}
+            <Text style={styles.badgeLabel}>{badge.name}</Text>
+            <Text style={styles.badgeLevel}>{badge.level}</Text>
+          </TouchableOpacity>
         ))}
       </View>
 
+      {/* Impact Investor Section */}
       <SectionHeader title="Impact Investor" />
       <View style={styles.badgesContainer}>
         {impactInvestorBadges.map((badge, index) => (
-          <TouchableHighlight
+          <TouchableOpacity
             key={index}
-            style={styles.badgeWrapper}
-            underlayColor="transparent"
+            style={[
+              styles.badgeWrapper,
+              badge.locked ? styles.lockedBadge : null,
+            ]}
             onPress={() => handleBadgePress(badge)}
           >
-            <View>
-              <Image
-                source={badge.image}
-                style={[
-                  styles.badgeImage,
-                  badge.locked ? styles.lockedBadge : null,
-                ]}
-              />
-              {badge.locked && (
-                <Image source={lockIcon} style={styles.lockIcon} />
-              )}
-              <Text style={styles.badgeLabel}>{badge.name}</Text>
-              <Text style={styles.badgeLevel}>{badge.level}</Text>
-            </View>
-          </TouchableHighlight>
+            <Image source={badge.image} style={styles.badgeImage} />
+            {badge.locked && (
+              <Image source={lockIcon} style={styles.lockIcon} />
+            )}
+            <Text style={styles.badgeLabel}>{badge.name}</Text>
+            <Text style={styles.badgeLevel}>{badge.level}</Text>
+          </TouchableOpacity>
         ))}
       </View>
 
-      {/* Modal */}
+      {/* Modal for Badge Details and Sharing */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -209,20 +273,25 @@ const RewardsSection = () => {
               <Text style={styles.modalBadgeLabel}>{selectedBadge.name}</Text>
               <Text style={styles.modalBadgeLevel}>{selectedBadge.level}</Text>
               {!selectedBadge.locked && (
-                <TouchableOpacity
-                  style={styles.shareButton}
-                  onPress={shareBadge}
-                >
-                  <Text style={styles.shareButtonText}>Share</Text>
-                </TouchableOpacity>
+                <View style={styles.shareButtonsContainer}>
+                  {Object.keys(shareIcons).map((app, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.shareButton}
+                      onPress={() => shareToApp(app)}
+                    >
+                      <Image
+                        source={shareIcons[app]}
+                        style={styles.shareIcon}
+                      />
+                      <Text style={styles.shareButtonText}>{app}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               )}
-              <TouchableHighlight
-                style={styles.closeButton}
-                onPress={closeModal}
-                underlayColor="#dddddd"
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
                 <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -231,68 +300,63 @@ const RewardsSection = () => {
   );
 };
 
+// SectionHeader component
 const SectionHeader = ({ title }) => (
   <View style={styles.sectionHeader}>
     <Text style={styles.sectionHeaderText}>{title}</Text>
   </View>
 );
 
+// Styles (continued)
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
-  },
-  sectionHeader: {
-    marginTop: 20,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    backgroundColor: "#f0f0f0",
-  },
-  sectionHeaderText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 20,
   },
   badgesContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    marginBottom: 20,
   },
   badgeWrapper: {
-    width: "45%",
-    marginBottom: 20,
-    alignItems: "center",
-    position: "relative",
+    width: "48%",
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: "hidden",
+    elevation: 2,
+    backgroundColor: "#f0f0f0", // Optional: Add background color for badges
   },
   badgeImage: {
-    marginLeft: 15,
-    width: 100,
-    height: 100,
-    resizeMode: "contain",
-  },
-  badgeLabel: {
-    marginTop: 5,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  badgeLevel: {
-    fontSize: 14,
-    color: "gray",
-    textAlign: "center",
+    width: "100%",
+    height: 150,
+    resizeMode: "cover",
   },
   lockedBadge: {
     opacity: 0.5,
   },
   lockIcon: {
     position: "absolute",
-    top: "40%",
-    left: "40%",
-    transform: [{ translateX: -10 }, { translateY: -10 }],
-    width: 40,
-    height: 40,
+    top: 5,
+    right: 5,
+    width: 20,
+    height: 20,
     resizeMode: "contain",
-    zIndex: 1,
   },
-  // Modal styles
+  badgeLabel: {
+    paddingHorizontal: 10,
+    paddingTop: 5,
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  badgeLevel: {
+    paddingHorizontal: 10,
+    paddingBottom: 5,
+    fontSize: 14,
+    textAlign: "center",
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -301,51 +365,67 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#fff",
-    padding: 20,
+    width: "80%",
     borderRadius: 10,
     alignItems: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   modalBadgeImage: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
+    marginBottom: 10,
   },
   modalBadgeLabel: {
-    marginTop: 10,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
+    marginBottom: 5,
   },
   modalBadgeLevel: {
     fontSize: 16,
-    color: "gray",
-    textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 10,
   },
-  closeButton: {
+  shareButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginTop: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#ddd",
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
   },
   shareButton: {
-    marginTop: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
+    alignItems: "center",
+  },
+  shareIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
   },
   shareButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 5,
+  },
+  closeButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    width: "80%",
+    backgroundColor: "#007BFF",
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    fontSize: 18,
     color: "#fff",
     textAlign: "center",
+  },
+  sectionHeader: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginVertical: 10,
+    borderRadius: 8,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
