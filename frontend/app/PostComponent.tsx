@@ -43,6 +43,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
   openUserDetails,
   userId,
 }) => {
+  console.log("item", item);
   const navigation = useNavigation(); // Initialize navigation
   const [upvoted, setUpvoted] = useState(item.upvotes.includes(userId));
   const [upvotes, setUpvotes] = useState(item.upvotes?.length ?? 0);

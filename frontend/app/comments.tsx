@@ -81,7 +81,9 @@ const Comments = () => {
                     style={styles.userImage}
                   />
                   <View style={styles.commentTextContainer}>
-                    <Text style={styles.commentUser}>{comment.userName}</Text>
+                    <Text style={styles.commentUser}>
+                      {comment.userId.username}
+                    </Text>
                     <Text style={styles.commentText}>{comment.comment}</Text>
                     <Text style={styles.commentDateTime}>
                       {formatDateTime(comment.createdAt)}
