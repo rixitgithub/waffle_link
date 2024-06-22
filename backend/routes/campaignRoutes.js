@@ -236,4 +236,33 @@ router.get("/:campaignId", async (req, res) => {
   }
 });
 
+router.get("/campaign/titles", authMiddleware, async (req, res) => {
+  const userId = req.user.id; // Assuming req.user.id is set by authMiddleware
+
+  try {
+    // Fetch the NGO owned by the authenticated user
+    const ngo = await NGO.findOne({ owner: userId });
+
+    if (!ngo) {
+      return res.status(404).json({ error: "No NGO found for this user" });
+    }
+
+    const ngoId = ngo._id; // Assuming ngo._id is the ObjectId of the NGO owned by the user
+
+    // Find campaigns where ngoId matches the NGO owned by the user
+    const campaigns = await Campaign.find({ ngoId }).select("title");
+
+    if (!campaigns || campaigns.length === 0) {
+      return res.status(404).json({ error: "No campaigns found for this NGO" });
+    }
+
+    // Extract titles from campaigns and send as response
+    const campaignTitles = campaigns.map((campaign) => campaign.title);
+    res.json({ campaignTitles });
+  } catch (error) {
+    console.error("Error fetching campaign titles:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;

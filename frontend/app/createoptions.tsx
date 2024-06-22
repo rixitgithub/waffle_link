@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import CampaignModal from "./CampaignModal"; // Import CampaignModal component
 import PostModal from "./PostModal"; // Import PostModal component
+import UpdateModal from "./UpdateModal"; // Import UpdateModal component
 
 const CreateOptions: React.FC = () => {
   const [campaignModalVisible, setCampaignModalVisible] = useState(false);
   const [campaignType, setCampaignType] = useState<null | string>(null);
 
   const [postModalVisible, setPostModalVisible] = useState(false);
+
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updateType, setUpdateType] = useState<null | string>(null);
 
   const openCampaignModal = (type: string) => {
     setCampaignType(type);
@@ -16,6 +20,10 @@ const CreateOptions: React.FC = () => {
 
   const openPostModal = () => {
     setPostModalVisible(true);
+  };
+
+  const openUpdateModal = () => {
+    setUpdateModalVisible(true);
   };
 
   return (
@@ -47,6 +55,10 @@ const CreateOptions: React.FC = () => {
         <Text style={styles.optionText}>Create Post</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.option} onPress={openUpdateModal}>
+        <Text style={styles.optionText}>Add Update</Text>
+      </TouchableOpacity>
+
       {/* CampaignModal component */}
       <CampaignModal
         visible={campaignModalVisible}
@@ -58,6 +70,12 @@ const CreateOptions: React.FC = () => {
       <PostModal
         visible={postModalVisible}
         onClose={() => setPostModalVisible(false)}
+      />
+
+      {/* UpdateModal component */}
+      <UpdateModal
+        visible={updateModalVisible}
+        onClose={() => setUpdateModalVisible(false)}
       />
     </View>
   );

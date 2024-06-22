@@ -141,3 +141,25 @@ export const getCampaignById = async (campaignId) => {
     throw error; // Propagate the error back to the caller
   }
 };
+export const getCampaigns = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axios.get(
+      `${API_URL}/api/campaigns/campaign/titles`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Include authorization header with token
+        },
+      }
+    );
+    return response.data; // Assuming your API response contains the campaign data
+  } catch (error) {
+    console.error("Error fetching campaigns:", error);
+    throw error; // Optionally handle or throw the error as needed
+  }
+};
