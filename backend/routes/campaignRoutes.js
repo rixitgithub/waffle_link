@@ -198,4 +198,26 @@ router.post("/volunteer-request-action", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/volunteer-recruited", authMiddleware, async (req, res) => {
+  const { userId } = req.user.id;
+
+  try {
+    // Find the NGO by owner's userId
+    const ngo = await Ngo.findOne({ owner: userId });
+    if (!ngo) {
+      return res.status(404).json({ message: "NGO not found for this owner" });
+    }
+
+    // Find campaigns of this NGO with type 'volunteer'
+    const campaigns = await Campaign.find({ ngoId: ngo._id, type: "volunteer" })
+      .populate("volunteer_recruited", "name email") // Populate recruited volunteers details
+      .exec();
+
+    res.json(campaigns);
+  } catch (error) {
+    console.error("Error fetching campaigns by NGO owner", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
