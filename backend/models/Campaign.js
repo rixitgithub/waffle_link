@@ -12,20 +12,20 @@ const campaignSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["fundraising", "volunteer", "awareness"], // Assuming these are the types
+    enum: ["fundraising", "volunteer", "awareness"],
     required: true,
   },
   goal: {
-    type: Number, // Assuming fundraising goal is a number
+    type: Number,
     required: function () {
-      return this.type === "fundraising"; // Required only if type is fundraising
+      return this.type === "fundraising";
     },
   },
   currency: {
     type: String,
-    enum: ["USD", "EUR", "GBP", "INR"], // Example currencies
+    enum: ["USD", "EUR", "GBP", "INR"],
     required: function () {
-      return this.type === "fundraising"; // Required only if type is fundraising
+      return this.type === "fundraising";
     },
   },
   endDate: {
@@ -33,39 +33,38 @@ const campaignSchema = new mongoose.Schema({
     required: true,
   },
   volunteerCount: {
-    type: Number, // Number of volunteers needed
+    type: Number,
     required: function () {
-      return this.type === "volunteer"; // Required only if type is volunteer
+      return this.type === "volunteer";
     },
   },
   skills: {
-    type: [String], // Array of skills needed for volunteer campaigns
+    type: [String],
     required: function () {
-      return this.type === "volunteer"; // Required only if type is volunteer
+      return this.type === "volunteer";
     },
   },
   shares: {
-    type: Number, // Target shares for awareness campaigns
+    type: Number,
     required: function () {
-      return this.type === "awareness"; // Required only if type is awareness
+      return this.type === "awareness";
     },
   },
   likes: {
-    type: Number, // Target likes for awareness campaigns
+    type: Number,
     required: function () {
-      return this.type === "awareness"; // Required only if type is awareness
+      return this.type === "awareness";
     },
   },
   ngoId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "NGO", // Reference to the NGO schema
+    ref: "NGO",
     required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-  // Progress fields for each type of campaign
   progress: {
     fundraising: {
       currentAmount: {
@@ -76,7 +75,7 @@ const campaignSchema = new mongoose.Schema({
         {
           user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User", // Reference to the User schema for donors
+            ref: "User",
           },
           amount: {
             type: Number,
@@ -94,7 +93,7 @@ const campaignSchema = new mongoose.Schema({
         {
           user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User", // Reference to the User schema for donors
+            ref: "User",
           },
           text: {
             type: String,
@@ -105,7 +104,7 @@ const campaignSchema = new mongoose.Schema({
       volunteer_recruited: [
         {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // Reference to the User schema for recruited volunteers
+          ref: "User",
         },
       ],
     },
@@ -120,6 +119,28 @@ const campaignSchema = new mongoose.Schema({
       },
     },
   },
+  updates: [
+    {
+      header: {
+        type: String,
+        required: true,
+      },
+      images: {
+        type: [String], // Array of image URLs
+      },
+      mapDetails: {
+        latitude: {
+          type: Number,
+        },
+        longitude: {
+          type: Number,
+        },
+        address: {
+          type: String,
+        },
+      },
+    },
+  ],
 });
 
 // Create and export Campaign model based on schema
