@@ -9,7 +9,7 @@ import {
   TextInput,
   Button,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { sendVolunteerRequest } from "../api/campaign"; // Import your sendVolunteerRequest function
 
 interface Campaign {
@@ -65,6 +65,7 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
   onDonate,
   onVolunteer,
 }) => {
+  const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -225,8 +226,16 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
     }
   };
 
+  const handleCampaignPress = () => {
+    // Navigate to CampaignDetailScreen with necessary params
+    navigation.navigate("CampaignDetailScreen", { campaignId: item._id });
+  };
+
   return (
-    <View style={[styles.campaignContainer, { backgroundColor: colors.card }]}>
+    <TouchableOpacity
+      style={[styles.campaignContainer, { backgroundColor: colors.card }]}
+      onPress={handleCampaignPress}
+    >
       <View style={styles.ngoContainer}>
         <Image
           source={{ uri: item.ngoId.profilePhoto }}
@@ -285,7 +294,7 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           <Text style={styles.successMessageText}>{successMessage}</Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

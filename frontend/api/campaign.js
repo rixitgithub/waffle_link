@@ -132,3 +132,12 @@ export const getVolunteerRecruited = async () => {
     throw error;
   }
 };
+export const getCampaignById = async (campaignId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/campaigns/${campaignId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching campaign by id:", error);
+    throw error; // Propagate the error back to the caller
+  }
+};
