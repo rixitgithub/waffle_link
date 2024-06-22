@@ -45,4 +45,15 @@ router.get("/details", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/fetch", async (req, res) => {
+  try {
+    const ngos = await NGO.find();
+    res.status(200).json(ngos);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching NGOs", error: err.message });
+  }
+});
+
 module.exports = router;

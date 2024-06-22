@@ -12,7 +12,6 @@ import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import { fetchUserProfile } from "../../api/user.js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import RewardsSection from "../RewardSection";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -119,12 +118,19 @@ const ProfileScreen = () => {
           <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
 
-        {/* Rewards Section */}
-        <View style={styles.rewardsSection}>
-          <Text style={styles.sectionTitle}>Rewards</Text>
-          {/* Render reward items here */}
-          <RewardsSection />
-        </View>
+        {/* View Rewards Button */}
+        <TouchableOpacity
+          style={styles.rewardsButton}
+          onPress={() => navigation.navigate("RewardSection")}
+        >
+          <Text style={styles.rewardsButtonText}>My Rewards</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.rewardsButton}
+          onPress={() => navigation.navigate("LeaderBoard")}
+        >
+          <Text style={styles.rewardsButtonText}>Leaderboard</Text>
+        </TouchableOpacity>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
@@ -143,7 +149,6 @@ const ProfileScreen = () => {
         >
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
-        <RewardsSection />
         {/* Create NGO Button */}
       </View>
     );
@@ -214,24 +219,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  rewardsSection: {
+  rewardsButton: {
+    backgroundColor: "#28a745",
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 5,
     marginBottom: 20,
+    alignItems: "center",
   },
-  sectionTitle: {
-    fontSize: 20,
+  rewardsButtonText: {
+    color: "#fff",
     fontWeight: "bold",
-    marginBottom: 10,
-  },
-  rewardItem: {
-    marginBottom: 10,
-  },
-  rewardName: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  rewardDescription: {
-    fontSize: 14,
-    color: "#666",
   },
   logoutButton: {
     position: "absolute",
