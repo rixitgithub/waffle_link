@@ -11,6 +11,7 @@ import {
   Modal,
   Alert,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchNGODetails } from "../api/ngo"; // Adjust the path as needed
@@ -48,6 +49,7 @@ type NGO = {
 };
 
 export default function YourNGO() {
+  const navigation = useNavigation();
   const [ngo, setNGO] = useState<NGO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,8 +90,7 @@ export default function YourNGO() {
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("token");
-      // You might want to navigate to the login screen after logging out
-      console.log("Logged out");
+      navigation.navigate("Login");
     } catch (error) {
       console.error("Error removing token", error);
     }

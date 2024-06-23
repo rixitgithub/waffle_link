@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import MapView, { Marker } from "react-native-maps";
 import * as ImagePicker from "expo-image-picker";
-import { getCampaigns } from "../api/campaign"; // Adjust import path as per your project structure
+import { getCampaigns, saveUpdate } from "../api/campaign"; // Adjust import path as per your project structure
 
 interface UpdateModalProps {
   visible: boolean;
@@ -54,6 +54,14 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ visible, onClose }) => {
     }
   }, [visible]);
 
+  useEffect(() => {
+    // Set default coordinates when modal is opened
+    setMapRegion({
+      latitude: 28.6304,
+      longitude: 77.2177,
+    });
+  }, [visible]);
+
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setMapRegion({ latitude, longitude });
@@ -82,10 +90,21 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ visible, onClose }) => {
     }
   };
 
-  const handleSaveUpdate = () => {
-    // Implement logic to save the update with selectedCampaign, updateHeader, updateImages, and mapRegion
-    Alert.alert("Update Saved!", "Your update has been successfully saved.");
-    onClose();
+  const handleSaveUpdate = async () => {
+    try {
+      await saveUpdate({
+        campaignId: selectedCampaign,
+        header: updateHeader,
+        latitude: mapRegion.latitude,
+        longitude: mapRegion.longitude,
+        images: updateImages,
+      });
+      Alert.alert("Update Saved!", "Your update has been successfully saved.");
+      onClose();
+    } catch (error) {
+      console.error("Error saving update:", error);
+      Alert.alert("Error", "There was an error saving the update.");
+    }
   };
 
   return (
@@ -147,6 +166,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ visible, onClose }) => {
               }}
               onPress={handleMapPress}
             >
+              {/* Default Marker */}
               <Marker coordinate={mapRegion} />
             </MapView>
           </View>

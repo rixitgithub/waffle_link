@@ -225,10 +225,21 @@ router.get("/volunteer-recruited", authMiddleware, async (req, res) => {
 router.get("/:campaignId", async (req, res) => {
   const { campaignId } = req.params;
   try {
-    const campaign = await Campaign.findById(campaignId).exec();
+    const campaign = await Campaign.findById(campaignId)
+      .populate({
+        path: "progress.fundraising.donors.user",
+        select: "name email",
+      })
+      .populate({
+        path: "progress.volunteer.volunteer_recruited",
+        select: "name email profilePicture bio",
+      })
+      .exec();
+
     if (!campaign) {
       return res.status(404).json({ error: "Campaign not found" });
     }
+    console.log("campaigns", campaign.progress.volunteer.volunteer_recruited);
     res.json(campaign);
   } catch (error) {
     console.error("Error fetching campaign by id:", error);
@@ -266,6 +277,90 @@ router.get("/campaign/titles", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error fetching campaign titles:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+router.post("/update", async (req, res) => {
+  try {
+    const { campaignId, header, images, latitude, longitude } = req.body;
+
+    // Find the campaign by ID
+    const campaign = await Campaign.findById(campaignId);
+
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+
+    // Create new update object
+    const newUpdate = {
+      header,
+      images,
+      mapDetails: {
+        latitude,
+        longitude,
+        address: "", // You can add address if available
+      },
+    };
+
+    // Push the new update to updates array
+    campaign.updates.push(newUpdate);
+
+    // Save the campaign with the new update
+    await campaign.save();
+
+    res.status(201).json({ message: "Update saved successfully" });
+  } catch (error) {
+    console.error("Error saving update:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+router.post("/campaign/donate", authMiddleware, async (req, res) => {
+  const { campaignId, amount } = req.body;
+  const userId = req.user.id; // Extracted from authMiddleware
+
+  if (!campaignId || !amount || isNaN(parseFloat(amount))) {
+    return res.status(400).json({ message: "Invalid campaign ID or amount." });
+  }
+
+  try {
+    const campaign = await Campaign.findById(campaignId);
+
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found." });
+    }
+
+    if (campaign.type !== "fundraising") {
+      return res
+        .status(400)
+        .json({ message: "Campaign is not a fundraising type." });
+    }
+
+    // Check if the user has already donated
+    const existingDonor = campaign.progress.fundraising.donors.find(
+      (donor) => donor.user.toString() === userId
+    );
+
+    if (existingDonor) {
+      // Update existing donor's amount
+      existingDonor.amount += parseFloat(amount);
+    } else {
+      // Add new donor details
+      campaign.progress.fundraising.donors.push({
+        user: userId,
+        amount: parseFloat(amount),
+      });
+    }
+
+    // Update fundraising progress
+    campaign.progress.fundraising.currentAmount += parseFloat(amount);
+
+    await campaign.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Donation successful.", campaign });
+  } catch (error) {
+    console.error("Error handling donation:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
 

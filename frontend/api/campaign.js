@@ -163,3 +163,52 @@ export const getCampaigns = async () => {
     throw error; // Optionally handle or throw the error as needed
   }
 };
+export const saveUpdate = async (updateData) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/campaigns/update`,
+      updateData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving update:", error);
+    throw error;
+  }
+};
+
+export const Donate = async (campaignId, donationAmount) => {
+  if (!donationAmount || isNaN(parseFloat(donationAmount))) {
+    throw new Error("Invalid Donation Amount. Please enter a valid amount.");
+  }
+
+  const amount = parseFloat(donationAmount);
+
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    const response = await axios.post(
+      `${API_URL}/api/campaigns/campaign/donate`,
+      {
+        campaignId: campaignId,
+        amount: amount,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error("Error donating. Please try again later.");
+    }
+
+    return { success: true, amount: amount };
+  } catch (error) {
+    console.error("Error donating:", error);
+    throw new Error("Failed to process donation. Please try again later.");
+  }
+};

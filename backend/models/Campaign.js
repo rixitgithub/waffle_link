@@ -81,6 +81,9 @@ const campaignSchema = new mongoose.Schema({
             type: Number,
             required: true,
           },
+          usedFor: {
+            type: String,
+          },
         },
       ],
     },
@@ -138,6 +141,11 @@ const campaignSchema = new mongoose.Schema({
         address: {
           type: String,
         },
+      },
+      updatedAt: {
+        // Add updatedAt field
+        type: Date,
+        default: Date.now,
       },
     },
   ],
