@@ -99,28 +99,6 @@ const ProfileScreen = () => {
           </Text>
         </View>
 
-        <View style={styles.activitySummaryContainer}>
-          <Text style={styles.activitySummaryTitle}>Activity Summary</Text>
-          <View style={styles.activitySummaryItem}>
-            <FontAwesome name="file-text-o" size={20} color="#007bff" />
-            <Text style={styles.activitySummaryText}>
-              Posts: {userData?.activitySummary?.posts || 0}
-            </Text>
-          </View>
-          <View style={styles.activitySummaryItem}>
-            <FontAwesome name="users" size={20} color="#007bff" />
-            <Text style={styles.activitySummaryText}>
-              Connections: {userData?.activitySummary?.connections || 0}
-            </Text>
-          </View>
-          <View style={styles.activitySummaryItem}>
-            <FontAwesome name="heart" size={20} color="#007bff" />
-            <Text style={styles.activitySummaryText}>
-              Followers: {userData?.activitySummary?.followers || 0}
-            </Text>
-          </View>
-        </View>
-
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("EditProfile")}
@@ -161,6 +139,14 @@ const ProfileScreen = () => {
             onPress={() => navigation.navigate("CreateAccount")}
           >
             <Text style={styles.createAccountButtonText}>Create Account</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.createAccountButton}
+            onPress={() => navigation.navigate("CreateNGO")}
+          >
+            <Text style={styles.createAccountButtonText}>
+              Register Your Ngo
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -221,10 +207,11 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#1e1e1e",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
+    width: 200,
     marginBottom: 20,
   },
   buttonText: {
@@ -233,10 +220,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   rewardsButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#1e1e1e",
     paddingVertical: 15,
     paddingHorizontal: 40,
-    borderRadius: 5,
+    borderRadius: 10,
+    width: 200,
     marginBottom: 20,
     alignItems: "center",
   },
@@ -250,7 +238,7 @@ const styles = StyleSheet.create({
     left: 10,
   },
   createAccountButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#FFA500",
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 5,

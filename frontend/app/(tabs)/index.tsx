@@ -96,14 +96,8 @@ const HomeScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.header}>
-        <FontAwesome
-          name="home"
-          size={24}
-          color={colors.text}
-          style={styles.headerIcon}
-        />
         <Text style={[styles.headerText, { color: colors.text }]}>
-          Ngo Connect
+          WaffleLink🧇
         </Text>
       </View>
       <View style={styles.toggleButtons}>
@@ -198,18 +192,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "gray",
+    borderColor: "#757575", // Use theme color for border
   },
   activeToggleButton: {
-    backgroundColor: "blue", // Change to your active color
-    borderColor: "blue", // Change to your active color
+    backgroundColor: "#FFA500", // Use theme color for active background
+    borderColor: "#FFA500", // Use theme color for active border
   },
   toggleButtonText: {
     fontSize: 16,
-    color: "gray",
+    color: "#757575", // Use theme color for text
   },
   activeToggleButtonText: {
-    color: "white", // Change to your active text color
+    color: "#FFFFFF", // Use theme color for active text
   },
   modalContent: {
     flex: 1,

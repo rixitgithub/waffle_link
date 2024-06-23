@@ -146,7 +146,6 @@ export default function YourNGO() {
         <Text style={styles.content}>{ngo.contactInfo}</Text>
       </View>
       <View style={styles.section}>
-        <Text style={styles.heading}>Founders</Text>
         {ngo.founders.map((founder, index) => (
           <View key={index} style={styles.founder}>
             {founder.image && (
@@ -234,6 +233,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    marginTop: 50,
   },
   header: {
     alignItems: "center",
@@ -262,8 +262,6 @@ const styles = StyleSheet.create({
   section: {
     paddingVertical: 15,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
   },
   heading: {
     fontSize: 18,
@@ -299,7 +297,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: "#007bff",
+    backgroundColor: "#1e1e1e",
   },
   navigationButtonText: {
     fontSize: 16,
@@ -307,7 +305,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   activeNavigationButton: {
-    backgroundColor: "#0056b3", // Adjust active button style as needed
+    backgroundColor: "#FFA500", // Adjust active button style as needed
   },
   activeNavigationButtonText: {
     fontWeight: "bold",

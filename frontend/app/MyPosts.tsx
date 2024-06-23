@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#fff",
   },
   heading: {
     fontSize: 18,

@@ -33,24 +33,38 @@ const LeaderboardScreen = () => {
   };
 
   // Function to render leaderboard item
-  const renderLeaderboardItem = ({ item }) => (
-    <View
-      style={[
-        styles.itemContainer,
-        item.id <= 3 && styles.topThreeItemContainer,
-      ]}
-    >
-      <Text style={[styles.rank, item.id <= 3 && styles.topThreeText]}>
-        {item.id}
-      </Text>
-      <Text style={[styles.name, item.id <= 3 && styles.topThreeText]}>
-        {item.name}
-      </Text>
-      <Text style={[styles.score, item.id <= 3 && styles.topThreeText]}>
-        {item.score}
-      </Text>
-    </View>
-  );
+  const renderLeaderboardItem = ({ item, index }) => {
+    let rankElement = null;
+
+    if (index === 0) {
+      rankElement = <View style={[styles.rankElement, styles.gold]} />;
+    } else if (index === 1) {
+      rankElement = <View style={[styles.rankElement, styles.silver]} />;
+    } else if (index === 2) {
+      rankElement = <View style={[styles.rankElement, styles.bronze]} />;
+    } else {
+      rankElement = <Text style={styles.rank}>{index + 1}</Text>;
+    }
+
+    return (
+      <View
+        style={[
+          styles.itemContainer,
+          item.highlighted && styles.highlightedItemContainer,
+        ]}
+      >
+        {rankElement}
+        <Text style={[styles.name, item.highlighted && styles.highlightedText]}>
+          {item.name}
+        </Text>
+        <Text
+          style={[styles.score, item.highlighted && styles.highlightedText]}
+        >
+          {item.score}
+        </Text>
+      </View>
+    );
+  };
 
   // Function to render pagination controls
   const renderPaginationControls = () => {
@@ -127,7 +141,7 @@ const LeaderboardScreen = () => {
         <>
           <FlatList
             data={leaderboardData.slice(startIndex, endIndex)}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item._id.toString()} // Assuming _id is an ObjectId
             renderItem={renderLeaderboardItem}
             contentContainerStyle={styles.listContainer}
           />
@@ -141,7 +155,7 @@ const LeaderboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     paddingTop: 20,
     backgroundColor: "#fff",
   },
@@ -153,11 +167,31 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
     paddingVertical: 10,
   },
-  topThreeItemContainer: {
-    backgroundColor: "#ffe6e6",
+  highlightedItemContainer: {
+    backgroundColor: "#e0f7fa",
+    borderWidth: 1,
+    borderColor: "#007bff",
+    borderRadius: 5,
+  },
+  rankElement: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  gold: {
+    backgroundColor: "#ffd700", // Gold color
+  },
+  silver: {
+    backgroundColor: "#c0c0c0", // Silver color
+  },
+  bronze: {
+    backgroundColor: "#cd7f32", // Bronze color
   },
   rank: {
-    width: 50,
+    width: 30,
     textAlign: "center",
     fontSize: 18,
   },
@@ -171,9 +205,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 18,
   },
-  topThreeText: {
+  highlightedText: {
     fontWeight: "bold",
-    color: "#ff4500",
+    color: "#007bff",
   },
   paginationContainer: {
     flexDirection: "row",

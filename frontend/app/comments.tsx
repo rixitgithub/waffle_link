@@ -72,7 +72,7 @@ const Comments = () => {
     <View style={styles.container}>
       <ScrollView style={{ flex: 1 }}>
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#1e1e1e" />
         ) : (
           <View>
             {comments && comments.length > 0 ? (

@@ -38,6 +38,7 @@ export default function RootLayout() {
           name="CampaignDetailScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="CreateAccount" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

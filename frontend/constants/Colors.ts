@@ -3,24 +3,24 @@
 export const Colors = {
   dark: {
     text: "#FFFFFF", // White
-    background: "#121212", // Darker Gray
-    tint: "#03DAC5", // Cyan
-    icon: "#757575", // Gray
-    tabIconDefault: "#757575", // Gray
-    tabIconSelected: "#03DAC5", // Cyan
-    inactive: "#424242", // Dark Gray
-    primary: "#03DAC5", // Cyan
-    border: "#757575", // Gray
+    background: "#121212", // Dark background
+    tint: "#FFA500", // Orange tint
+    icon: "#757575", // Gray icon
+    tabIconDefault: "#757575", // Gray tab icon (default)
+    tabIconSelected: "#FFA500", // Orange tab icon (selected)
+    inactive: "#424242", // Dark gray inactive
+    primary: "#FFA500", // Orange primary
+    border: "#757575", // Gray border
   },
   light: {
-    text: "#000000", // Black
-    background: "#F5F5F5", // Light Gray
-    tint: "#FF4081", // Pink
-    icon: "#9E9E9E", // Gray
-    tabIconDefault: "#9E9E9E", // Gray
-    tabIconSelected: "#FF4081", // Pink
-    inactive: "#B0BEC5", // Blue Gray
-    primary: "#FF4081", // Pink
-    border: "#9E9E9E", // Gray
+    text: "#333333", // Dark text
+    background: "#FFFFFF", // White background
+    tint: "#FFA500", // Orange tint
+    icon: "#9E9E9E", // Gray icon
+    tabIconDefault: "#9E9E9E", // Gray tab icon (default)
+    tabIconSelected: "#FFA500", // Orange tab icon (selected)
+    inactive: "#B0BEC5", // Blue gray inactive
+    primary: "#FFA500", // Orange primary
+    border: "#9E9E9E", // Gray border
   },
 };

@@ -63,5 +63,30 @@ router.get("/rewards", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch rewards details" });
   }
 });
+router.get("/leaderboard", authMiddleware, async (req, res) => {
+  try {
+    // Fetch all users sorted by score in descending order
+    const users = await User.find({}, "name location score").sort({
+      score: -1,
+    });
+
+    // Find current user's index in the sorted array
+    const currentUserId = req.user.id; // Assuming authenticated user ID is available
+    const currentUserIndex = users.findIndex(
+      (user) => user._id.toString() === currentUserId
+    );
+
+    // Prepare response data with highlighted current user
+    const leaderboardData = users.map((user, index) => ({
+      ...user._doc,
+      highlighted: index === currentUserIndex,
+    }));
+    console.log(leaderboardData);
+    res.json(leaderboardData);
+  } catch (error) {
+    console.error("Error fetching leaderboard data:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
 
 module.exports = router;

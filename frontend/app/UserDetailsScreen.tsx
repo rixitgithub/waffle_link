@@ -257,10 +257,7 @@ const UserDetailsScreen = () => {
                   Mission: {ngoDetails.missionStatement}
                 </Text>
                 <Text style={styles.ngoContact}>
-                  Contact: {ngoDetails.contactEmail}
-                </Text>
-                <Text style={styles.ngoWebsite}>
-                  Website: {ngoDetails.website}
+                  Contact: {ngoDetails.contactInfo}
                 </Text>
               </View>
             </View>
@@ -311,7 +308,7 @@ const UserDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -351,17 +348,19 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
+    marginLeft: 80,
   },
   toggleButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: "#007bff",
+    backgroundColor: "#1e1e1e",
   },
   activeToggle: {
-    backgroundColor: "#0056b3",
+    backgroundColor: "#1e1e1e",
   },
   toggleText: {
     color: "#fff",

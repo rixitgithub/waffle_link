@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     position: "absolute",
-    top: 40,
+    top: 30,
     left: 20,
     padding: 10,
     backgroundColor: "transparent",

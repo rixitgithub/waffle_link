@@ -71,7 +71,7 @@ export const fetchRewardsData = async () => {
 export const fetchLeaderboardData = async () => {
   try {
     const token = await AsyncStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/api/users/leadboard`, {
+    const response = await axios.get(`${API_URL}/api/users/leaderboard`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

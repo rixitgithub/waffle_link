@@ -181,7 +181,9 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           style={[styles.actionButton, styles.donateButton]}
           onPress={() => onDonate && onDonate(item._id)}
         >
-          <Text style={styles.actionButtonText}>Donate</Text>
+          <Text style={[styles.actionButtonText, { color: "#ffffff" }]}>
+            Donate
+          </Text>
         </TouchableOpacity>
       );
     } else if (item.type === "volunteer") {
@@ -190,7 +192,9 @@ const CampaignComponent: React.FC<CampaignComponentProps> = ({
           style={[styles.actionButton, styles.volunteerButton]}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={styles.actionButtonText}>Volunteer</Text>
+          <Text style={[styles.actionButtonText, { color: "#ffffff" }]}>
+            Volunteer
+          </Text>
         </TouchableOpacity>
       );
     }
@@ -398,19 +402,20 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
   },
   donateButton: {
-    backgroundColor: "#1E90FF",
+    backgroundColor: "#1e1e1e",
   },
   volunteerButton: {
-    backgroundColor: "#32CD32",
+    backgroundColor: "#1e1e1e",
   },
   actionButtonText: {
-    color: "#fff",
+    color: "#ffffff", // Black color for button text
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -434,24 +439,42 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     minWidth: 300,
+    maxWidth: "80%", // Adjust maximum width as per your design
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15, // Increased margin bottom for better spacing
+    textAlign: "center", // Center align text
   },
   textInput: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    padding: 12, // Increased padding for better touch area
+    marginBottom: 15, // Increased margin bottom for better spacing
     width: "100%",
+    fontSize: 16, // Increased font size for better readability
   },
   modalButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    width: "100%",
+    width: "50%",
+    marginTop: 10, // Added top margin for better spacing
+  },
+  modalButton: {
+    flex: 1, // Occupy equal space within the container
+    marginHorizontal: 5, // Added horizontal margin for button spacing
+    paddingVertical: 12, // Increased padding for better touch area
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFA500", // Adjust background color as needed
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   successMessageContainer: {
     backgroundColor: "rgba(0, 255, 0, 0.9)", // Green color for success message background

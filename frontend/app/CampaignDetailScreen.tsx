@@ -14,6 +14,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { Video } from "expo-av";
 import { useNavigation, useRoute } from "@react-navigation/native";
 const { width } = Dimensions.get("window");
 import MapView, { Marker } from "react-native-maps";
@@ -108,9 +109,16 @@ const CampaignDetailScreen = () => {
 
   if (!campaign) {
     return (
-      <View style={styles.container}>
-        <Text>Loading campaign details...</Text>
-      </View>
+      <Video
+        source={require("../assets/images/loader.mp4")}
+        style={styles.video}
+        resizeMode="cover"
+        shouldPlay
+        isLooping
+        onPlaybackStatusUpdate={(status) =>
+          console.log("Playback Status:", status)
+        }
+      />
     );
   }
 
@@ -156,15 +164,11 @@ const CampaignDetailScreen = () => {
           <View style={styles.progressContainer}>
             <View style={styles.progressRow}>
               <View style={styles.progressItem}>
-                <Text style={styles.progressLabel}>
-                  Goal ({campaign.currency})
-                </Text>
+                <Text style={styles.progressLabel}>Goal ($)</Text>
                 <Text style={styles.progressAmount}>{campaign.goal}</Text>
               </View>
               <View style={styles.progressItem}>
-                <Text style={styles.progressLabel}>
-                  Raised ({campaign.currency})
-                </Text>
+                <Text style={styles.progressLabel}>Raised ($)</Text>
                 <Text style={styles.progressAmount}>
                   {campaign.progress.fundraising.currentAmount}{" "}
                 </Text>
@@ -207,9 +211,7 @@ const CampaignDetailScreen = () => {
                     <Text style={styles.donorDescription}>
                       {item.usedFor || "-"}
                     </Text>
-                    <Text style={styles.donorAmount}>
-                      {item.amount} {campaign.currency}
-                    </Text>
+                    <Text style={styles.donorAmount}>$ {item.amount}</Text>
                   </View>
                 )}
                 ListHeaderComponent={() => (
@@ -737,6 +739,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     maxWidth: "80%", // Adjust the width of the bio text
     alignSelf: "center", // Center the text within its container
+  },
+  video: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
 });
 

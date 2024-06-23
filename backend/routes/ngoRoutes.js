@@ -7,7 +7,7 @@ const router = express.Router();
 // POST endpoint to create a new NGO
 router.post("/create", authMiddleware, async (req, res) => {
   try {
-    const { userId } = req; // Extract userId from authenticated request
+    const userId = req.user.id; // Extract userId from authenticated request
 
     // Create a new NGO instance with owner set to userId
     const newNgo = new Ngo({

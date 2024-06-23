@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   ngoContainer: {
-    marginTop: 30,
+    marginTop: 60,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     position: "absolute",
-    top: 16,
+    top: 35,
     left: 16,
     zIndex: 1,
   },
