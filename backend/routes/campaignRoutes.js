@@ -4,6 +4,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Campaign = require("../models/Campaign");
 const NGO = require("../models/NGO");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -317,6 +318,29 @@ router.post("/update", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+const calculateNextBadgeLevel = (moneyDonated) => {
+  // Define your badge levels here based on money donated thresholds
+  const badgeLevels = [
+    { name: "Bronze Badge", amount: 500 },
+    { name: "Silver Badge", amount: 1000 },
+    { name: "Gold Badge", amount: 5000 },
+    // Add more badge levels as needed
+  ];
+
+  // Sort badge levels by amount in ascending order
+  badgeLevels.sort((a, b) => a.amount - b.amount);
+
+  // Find the next badge level that user has unlocked
+  for (let i = 0; i < badgeLevels.length; i++) {
+    if (moneyDonated < badgeLevels[i].amount) {
+      return badgeLevels[i];
+    }
+  }
+
+  // If all levels are unlocked, return null
+  return null;
+};
+
 router.post("/campaign/donate", authMiddleware, async (req, res) => {
   const { campaignId, amount } = req.body;
   const userId = req.user.id; // Extracted from authMiddleware
@@ -360,18 +384,58 @@ router.post("/campaign/donate", authMiddleware, async (req, res) => {
     campaign.progress.fundraising.currentAmount += donationAmount;
 
     // Update user's money_donated and score
-    await User.findByIdAndUpdate(userId, {
-      $inc: {
-        money_donated: donationAmount,
-        score: Math.floor(donationAmount / 100),
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $inc: {
+          money_donated: donationAmount,
+          score: Math.floor(donationAmount / 100),
+        },
       },
-    });
+      { new: true }
+    ); // Ensure to get updated user document
 
     await campaign.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "Donation successful.", campaign });
+    // Calculate if user unlocked a new badge level
+    const nextLevel = calculateNextBadgeLevel(user.money_donated);
+
+    let message = "Donation successful.";
+    let celebrate = false;
+
+    if (nextLevel && user.money_donated >= nextLevel.amount) {
+      message += ` You have unlocked ${nextLevel.name}.`;
+      celebrate = true;
+    } else if (nextLevel) {
+      message += ` You need ${
+        nextLevel.amount - user.money_donated
+      } more to unlock ${nextLevel.name}.`;
+    }
+    const sum = user.money_donated + amount;
+    console.log("sum", sum);
+
+    const impactInvestorBadges = user.impact_investor_badges;
+    let updatedBadges = 0;
+    const badgeAmounts = [500, 1000, 5000, 10000, 50000];
+    console.log(sum);
+    for (let i = 0; i < impactInvestorBadges.length; i++) {
+      console.log(impactInvestorBadges[i]);
+      console.log("badge amount", badgeAmounts[i]);
+      if (sum >= badgeAmounts[i]) {
+        impactInvestorBadges[i].locked = false;
+        console.log(impactInvestorBadges[i].locked);
+        updatedBadges++;
+      } else {
+        impactInvestorBadges[i].locked = true;
+      }
+    }
+
+    await user.save();
+    console.log("final");
+    console.log({ success: true, message, campaign });
+
+    // Send celebrate:true only if user has crossed the required amount
+    res.status(200).json({ success: true, message, campaign, celebrate });
   } catch (error) {
     console.error("Error handling donation:", error);
     res.status(500).json({ message: "Server error. Please try again later." });

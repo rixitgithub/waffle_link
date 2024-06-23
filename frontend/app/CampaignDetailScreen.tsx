@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  TouchableHighlight,
   Button,
   Alert,
   Dimensions,
@@ -28,6 +29,9 @@ const CampaignDetailScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
   const [volunteerText, setVolunteerText] = useState("");
+  const [donationSuceessModalVisible, setDonationSuceessModalVisible] =
+    useState(false);
+  const [donationSuccessMessage, setDonationSuccessMessage] = useState("");
 
   const fetchCampaignDetails = async (id) => {
     try {
@@ -84,6 +88,11 @@ const CampaignDetailScreen = () => {
             text: "OK",
             onPress: () => {
               setDonationModalVisible(false);
+              setDonationSuccessMessage(result.message);
+              setDonationModalVisible(false);
+              setDonationSuceessModalVisible(true);
+
+              // Close the donation modal (if it's open)
               fetchCampaignDetails(campaignId); // Refresh campaign details
             },
           },
@@ -272,6 +281,50 @@ const CampaignDetailScreen = () => {
             )}
           </View>
         )}
+
+        <View style={{ marginTop: 22 }}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={donationSuceessModalVisible}
+            onRequestClose={() => {
+              setDonationSuceessModalVisible(false);
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  padding: 20,
+                  borderRadius: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ marginBottom: 20 }}>
+                  {donationSuccessMessage}
+                </Text>
+                <TouchableHighlight
+                  style={{
+                    backgroundColor: "#2196F3",
+                    padding: 10,
+                    borderRadius: 5,
+                  }}
+                  onPress={() => {
+                    setDonationModalVisible(false);
+                  }}
+                >
+                  <Text style={{ color: "white" }}>Close Modal</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+        </View>
 
         <Modal
           animationType="slide"

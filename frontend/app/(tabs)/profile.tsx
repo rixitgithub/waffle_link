@@ -149,14 +149,21 @@ const ProfileScreen = () => {
     );
   } else {
     return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.createAccountButton}
-          onPress={() => navigation.navigate("CreateAccount")}
-        >
-          <Text style={styles.createAccountButtonText}>Create Account</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={styles.createAccountButton}
+            onPress={() => navigation.navigate("CreateAccount")}
+          >
+            <Text style={styles.createAccountButtonText}>Create Account</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     );
   }
 };

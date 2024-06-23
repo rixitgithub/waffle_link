@@ -7,60 +7,30 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { fetchLeaderboardData } from "../api/user"; // Adjust path as per your project structure
 
 const LeaderboardScreen = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const PAGE_SIZE = 15; // Number of items per page
 
   useEffect(() => {
-    // Simulated leaderboard data (replace with actual API call or data fetch)
-    const data = [
-      { id: 1, name: "John Doe", score: 250 },
-      { id: 2, name: "Jane Smith", score: 200 },
-      { id: 3, name: "Alice Johnson", score: 180 },
-      { id: 4, name: "Bob Brown", score: 150 },
-      { id: 5, name: "Eve Green", score: 120 },
-      { id: 6, name: "Chris Lee", score: 100 },
-      { id: 7, name: "Sophia Wilson", score: 90 },
-      { id: 8, name: "Michael Davis", score: 80 },
-      { id: 9, name: "Olivia Martinez", score: 70 },
-      { id: 10, name: "David Taylor", score: 60 },
-      { id: 11, name: "Emma Brown", score: 55 },
-      { id: 12, name: "Noah Garcia", score: 50 },
-      { id: 13, name: "Ava Hernandez", score: 45 },
-      { id: 14, name: "Liam Martinez", score: 40 },
-      { id: 15, name: "Isabella Clark", score: 35 },
-      { id: 16, name: "James White", score: 30 },
-      { id: 17, name: "Sophia Harris", score: 25 },
-      { id: 18, name: "Logan Wilson", score: 20 },
-      { id: 19, name: "Mia King", score: 15 },
-      { id: 20, name: "Alexander Young", score: 10 },
-      { id: 21, name: "Emily Moore", score: 9 },
-      { id: 22, name: "Benjamin Scott", score: 8 },
-      { id: 23, name: "Chloe Young", score: 7 },
-      { id: 24, name: "William Lopez", score: 6 },
-      { id: 25, name: "Amelia Baker", score: 5 },
-      { id: 26, name: "Daniel White", score: 4 },
-      { id: 27, name: "Madison Johnson", score: 3 },
-      { id: 28, name: "Jackson Hall", score: 2 },
-      { id: 29, name: "Grace Moore", score: 1 },
-      { id: 30, name: "Lucas Wright", score: 0 },
-      { id: 31, name: "Sophie Thompson", score: 300 },
-      { id: 32, name: "William Brown", score: 280 },
-      { id: 33, name: "Ava Johnson", score: 270 },
-      { id: 34, name: "Oliver Wilson", score: 260 },
-      { id: 35, name: "Charlotte Martinez", score: 240 },
-      { id: 36, name: "Mason Taylor", score: 230 },
-      { id: 37, name: "Amelia Clark", score: 220 },
-      { id: 38, name: "Jacob White", score: 210 },
-      { id: 39, name: "Sophia Harris", score: 200 },
-      { id: 40, name: "Logan King", score: 190 },
-    ];
-
-    setLeaderboardData(data);
+    fetchLeaderboard();
   }, []);
+
+  const fetchLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchLeaderboardData();
+      setLeaderboardData(data);
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to fetch leaderboard data. Please try again later.");
+      setLoading(false);
+    }
+  };
 
   // Function to render leaderboard item
   const renderLeaderboardItem = ({ item }) => (
@@ -84,6 +54,14 @@ const LeaderboardScreen = () => {
 
   // Function to render pagination controls
   const renderPaginationControls = () => {
+    if (loading) {
+      return <ActivityIndicator size="large" color="#007bff" />;
+    }
+
+    if (error) {
+      return <Text style={styles.errorText}>{error}</Text>;
+    }
+
     const totalPages = Math.ceil(leaderboardData.length / PAGE_SIZE);
 
     // Array to generate page numbers
@@ -143,13 +121,19 @@ const LeaderboardScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={leaderboardData.slice(startIndex, endIndex)}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderLeaderboardItem}
-        contentContainerStyle={styles.listContainer}
-      />
-      {renderPaginationControls()}
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" />
+      ) : (
+        <>
+          <FlatList
+            data={leaderboardData.slice(startIndex, endIndex)}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderLeaderboardItem}
+            contentContainerStyle={styles.listContainer}
+          />
+          {renderPaginationControls()}
+        </>
+      )}
     </View>
   );
 };
@@ -214,6 +198,12 @@ const styles = StyleSheet.create({
   },
   paginationActiveText: {
     color: "#fff",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

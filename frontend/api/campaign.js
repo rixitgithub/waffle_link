@@ -205,8 +205,8 @@ export const Donate = async (campaignId, donationAmount) => {
     if (!response.data.success) {
       throw new Error("Error donating. Please try again later.");
     }
-
-    return { success: true, amount: amount };
+    console.log("lets try", response.data);
+    return { success: true, amount: amount, message: response.data.message };
   } catch (error) {
     console.error("Error donating:", error);
     throw new Error("Failed to process donation. Please try again later.");

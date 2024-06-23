@@ -67,3 +67,18 @@ export const fetchRewardsData = async () => {
     throw error;
   }
 };
+
+export const fetchLeaderboardData = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/api/users/leadboard`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching leaderboard data:", error);
+    throw error; // Rethrow the error to handle it in the component
+  }
+};

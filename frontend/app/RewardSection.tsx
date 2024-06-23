@@ -37,19 +37,19 @@ const lockIcon = require("../assets/images/locked.png");
 
 // Badge image mapping
 const eventAttenderBadgeMap = {
-  "event_attender_1.png": eventAttenderBadge1,
-  "event_attender_2.png": eventAttenderBadge2,
+  "event_attender_1.png": eventAttenderBadge5,
+  "event_attender_2.png": eventAttenderBadge4,
   "event_attender_3.png": eventAttenderBadge3,
-  "event_attender_4.png": eventAttenderBadge4,
-  "event_attender_5.png": eventAttenderBadge5,
+  "event_attender_4.png": eventAttenderBadge2,
+  "event_attender_5.png": eventAttenderBadge1,
 };
 
 const impactInvestorBadgeMap = {
-  "impact_investor_1.png": impactInvestorBadge1,
-  "impact_investor_2.png": impactInvestorBadge2,
+  "impact_investor_1.png": impactInvestorBadge5,
+  "impact_investor_2.png": impactInvestorBadge4,
   "impact_investor_3.png": impactInvestorBadge3,
-  "impact_investor_4.png": impactInvestorBadge4,
-  "impact_investor_5.png": impactInvestorBadge5,
+  "impact_investor_4.png": impactInvestorBadge2,
+  "impact_investor_5.png": impactInvestorBadge1,
 };
 
 const RewardsSection = ({ userId }) => {
