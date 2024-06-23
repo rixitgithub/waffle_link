@@ -9,12 +9,15 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Button,
   Alert,
+  Dimensions,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+const { width } = Dimensions.get("window");
 import MapView, { Marker } from "react-native-maps";
 import Swiper from "react-native-swiper";
-import { getCampaignById, Donate } from "../api/campaign";
+import { getCampaignById, Donate, sendVolunteerRequest } from "../api/campaign";
 
 const CampaignDetailScreen = () => {
   const navigation = useNavigation();
@@ -22,7 +25,9 @@ const CampaignDetailScreen = () => {
   const campaignId = route.params ? route.params.campaignId : null;
   const [campaign, setCampaign] = useState(null);
   const [donationAmount, setDonationAmount] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
+  const [volunteerText, setVolunteerText] = useState("");
 
   const fetchCampaignDetails = async (id) => {
     try {
@@ -31,6 +36,29 @@ const CampaignDetailScreen = () => {
       setCampaign(fetchedCampaign);
     } catch (error) {
       console.error("Error fetching campaign details:", error);
+    }
+  };
+
+  const handleVolunteerSubmit = async () => {
+    if (volunteerText.trim() === "") {
+      // Optionally handle empty volunteer text
+      return;
+    }
+
+    const requestData = {
+      campaignId: item._id,
+      text: volunteerText,
+    };
+
+    try {
+      const newUser = await sendVolunteerRequest(requestData);
+      console.log("User created:", newUser);
+      setModalVisible(false);
+
+      // Optionally, perform any additional actions upon successful volunteer submission
+    } catch (error) {
+      console.error("Error creating user:", error.message);
+      // Optionally, handle and display the error message to the user
     }
   };
 
@@ -207,10 +235,17 @@ const CampaignDetailScreen = () => {
         )}
 
         {/* Display Volunteers */}
-        {/* Display Volunteers */}
         {campaign.type === "volunteer" && (
           <View style={styles.volunteersContainer}>
-            <Text style={styles.sectionTitle}>Volunteers</Text>
+            <View style={styles.header}>
+              <Text style={styles.sectionTitle}>Volunteers</Text>
+              <TouchableOpacity
+                style={styles.donateButton}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text style={styles.donateButtonText}>Become a Volunteer</Text>
+              </TouchableOpacity>
+            </View>
             {campaign.progress.volunteer.volunteer_recruited.length > 0 ? (
               <FlatList
                 data={campaign.progress.volunteer.volunteer_recruited}
@@ -237,6 +272,34 @@ const CampaignDetailScreen = () => {
             )}
           </View>
         )}
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Volunteer Form</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Write something"
+                value={volunteerText}
+                onChangeText={setVolunteerText}
+              />
+              <View style={styles.modalButtonContainer}>
+                <Button title="Yes" onPress={handleVolunteerSubmit} />
+                <Button
+                  title="No"
+                  onPress={() => setModalVisible(!modalVisible)}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Updates Section */}
         <View style={styles.updatesSection}>
@@ -329,7 +392,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   container: {
-    padding: 45,
+    padding: 25,
+    marginTop: 25,
   },
   title: {
     fontSize: 24,
@@ -524,6 +588,40 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 5,
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    minWidth: 300,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    width: "100%",
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+  },
   modalButton: {
     backgroundColor: "blue",
     padding: 10,
@@ -543,6 +641,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   volunteerCard: {
+    width: width / 2 - 30, // Adjusted width for two cards per row
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 10,
@@ -583,6 +682,8 @@ const styles = StyleSheet.create({
   volunteerBio: {
     fontSize: 14,
     textAlign: "center",
+    maxWidth: "80%", // Adjust the width of the bio text
+    alignSelf: "center", // Center the text within its container
   },
 });
 
