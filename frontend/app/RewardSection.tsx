@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,27 +10,19 @@ import {
   Linking,
   Alert,
 } from "react-native";
+import { fetchRewardsData } from "../api/user"; // Adjust the path as necessary
 
-// Event Attender badge images
-const eventAttenderBadgeImages = [
-  require("../assets/images/event_attender_5.png"),
-  require("../assets/images/event_attender_4.png"),
-  require("../assets/images/event_attender_3.png"),
-  require("../assets/images/event_attender_2.png"),
-  require("../assets/images/event_attender_1.png"),
-];
-
-// Impact Investor badge images
-const impactInvestorBadgeImages = [
-  require("../assets/images/impact_investor_5.png"),
-  require("../assets/images/impact_investor_4.png"),
-  require("../assets/images/impact_investor_3.png"),
-  require("../assets/images/impact_investor_2.png"),
-  require("../assets/images/impact_investor_1.png"),
-];
-
-// Lock icon image
-const lockIcon = require("../assets/images/locked.png");
+// Import badge images statically
+import eventAttenderBadge1 from "../assets/images/event_attender_1.png";
+import eventAttenderBadge2 from "../assets/images/event_attender_2.png";
+import eventAttenderBadge3 from "../assets/images/event_attender_3.png";
+import eventAttenderBadge4 from "../assets/images/event_attender_4.png";
+import eventAttenderBadge5 from "../assets/images/event_attender_5.png";
+import impactInvestorBadge1 from "../assets/images/impact_investor_1.png";
+import impactInvestorBadge2 from "../assets/images/impact_investor_2.png";
+import impactInvestorBadge3 from "../assets/images/impact_investor_3.png";
+import impactInvestorBadge4 from "../assets/images/impact_investor_4.png";
+import impactInvestorBadge5 from "../assets/images/impact_investor_5.png";
 
 // Share icons for different platforms
 const shareIcons = {
@@ -41,77 +33,46 @@ const shareIcons = {
   telegram: require("../assets/images/telegram.png"),
   email: require("../assets/images/gmail.png"),
 };
+const lockIcon = require("../assets/images/locked.png");
 
-// Example data for event attender and impact investor badges
-const eventAttenderBadges = [
-  {
-    image: eventAttenderBadgeImages[0],
-    name: "Bronze Badge",
-    level: "Attended 3 Events",
-    locked: false, // Example: Initially unlocked
-  },
-  {
-    image: eventAttenderBadgeImages[1],
-    name: "Silver Badge",
-    level: "Attended 10 Events",
-    locked: true,
-  },
-  {
-    image: eventAttenderBadgeImages[2],
-    name: "Golden Badge",
-    level: "Attended 25 Events",
-    locked: true,
-  },
-  {
-    image: eventAttenderBadgeImages[3],
-    name: "Platinum Badge",
-    level: "Attended 50 Events",
-    locked: true,
-  },
-  {
-    image: eventAttenderBadgeImages[4],
-    name: "Diamond Badge",
-    level: "Attended 100 Events",
-    locked: true,
-  },
-];
+// Badge image mapping
+const eventAttenderBadgeMap = {
+  "event_attender_1.png": eventAttenderBadge1,
+  "event_attender_2.png": eventAttenderBadge2,
+  "event_attender_3.png": eventAttenderBadge3,
+  "event_attender_4.png": eventAttenderBadge4,
+  "event_attender_5.png": eventAttenderBadge5,
+};
 
-const impactInvestorBadges = [
-  {
-    image: impactInvestorBadgeImages[0],
-    name: "Impact Bronze Badge",
-    level: "Contributed $500",
-    locked: false,
-  },
-  {
-    image: impactInvestorBadgeImages[1],
-    name: "Impact Silver Badge",
-    level: "Contributed $1000",
-    locked: false,
-  },
-  {
-    image: impactInvestorBadgeImages[2],
-    name: "Impact Golden Badge",
-    level: "Contributed $5000",
-    locked: true,
-  },
-  {
-    image: impactInvestorBadgeImages[3],
-    name: "Impact Platinum Badge",
-    level: "Contributed $10000",
-    locked: true,
-  },
-  {
-    image: impactInvestorBadgeImages[4],
-    name: "Impact Diamond Badge",
-    level: "Contributed $50000",
-    locked: true,
-  },
-];
+const impactInvestorBadgeMap = {
+  "impact_investor_1.png": impactInvestorBadge1,
+  "impact_investor_2.png": impactInvestorBadge2,
+  "impact_investor_3.png": impactInvestorBadge3,
+  "impact_investor_4.png": impactInvestorBadge4,
+  "impact_investor_5.png": impactInvestorBadge5,
+};
 
-const RewardsSection = () => {
+const RewardsSection = ({ userId }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState(null);
+  const [eventAttenderBadges, setEventAttenderBadges] = useState([]);
+  const [impactInvestorBadges, setImpactInvestorBadges] = useState([]);
+
+  useEffect(() => {
+    // Function to fetch rewards data
+    const fetchRewards = async () => {
+      try {
+        const rewardsData = await fetchRewardsData(userId);
+        setEventAttenderBadges(rewardsData.eventAttenderBadges);
+        setImpactInvestorBadges(rewardsData.impactInvestorBadges);
+      } catch (error) {
+        console.error("Error fetching rewards:", error);
+        // Handle error state or retry logic as needed
+      }
+    };
+
+    fetchRewards();
+  }, [userId]); // Trigger fetchRewards on userId change
 
   const handleBadgePress = (badge) => {
     setSelectedBadge(badge);
@@ -224,7 +185,10 @@ const RewardsSection = () => {
             ]}
             onPress={() => handleBadgePress(badge)}
           >
-            <Image source={badge.image} style={styles.badgeImage} />
+            <Image
+              source={eventAttenderBadgeMap[badge.image]}
+              style={styles.badgeImage}
+            />
             {badge.locked && (
               <Image source={lockIcon} style={styles.lockIcon} />
             )}
@@ -246,7 +210,10 @@ const RewardsSection = () => {
             ]}
             onPress={() => handleBadgePress(badge)}
           >
-            <Image source={badge.image} style={styles.badgeImage} />
+            <Image
+              source={impactInvestorBadgeMap[badge.image]}
+              style={styles.badgeImage}
+            />
             {badge.locked && (
               <Image source={lockIcon} style={styles.lockIcon} />
             )}
@@ -267,7 +234,10 @@ const RewardsSection = () => {
           {selectedBadge && (
             <View style={styles.modalContent}>
               <Image
-                source={selectedBadge.image}
+                source={
+                  eventAttenderBadgeMap[selectedBadge.image] ||
+                  impactInvestorBadgeMap[selectedBadge.image]
+                }
                 style={styles.modalBadgeImage}
               />
               <Text style={styles.modalBadgeLabel}>{selectedBadge.name}</Text>
@@ -307,7 +277,7 @@ const SectionHeader = ({ title }) => (
   </View>
 );
 
-// Styles (continued)
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -422,6 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginVertical: 10,
     borderRadius: 8,
+    backgroundColor: "#f0f0f0", // Optional: Add background color for section header
   },
   sectionHeaderText: {
     fontSize: 18,

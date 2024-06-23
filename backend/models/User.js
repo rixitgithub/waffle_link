@@ -6,15 +6,29 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   bio: { type: String },
-  profilePicture: { type: String }, // URL to profile picture
-  location: { type: String }, // Location of the user
-  website: { type: String }, // User's website URL
-  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs who follow this user
-  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs whom this user follows
-  joinedAt: { type: Date, default: Date.now }, // Date when the user joined
-  money_donated: { type: Number, default: 0 }, // Total amount of money donated by the user
-  score: { type: Number, default: 0 }, // User's score
-  events_volunteered: { type: Number, default: 0 }, // Number of events the user has volunteered for
+  profilePicture: { type: String },
+  location: { type: String },
+  website: { type: String },
+  money_donated: { type: Number, default: 0 },
+  score: { type: Number, default: 0 },
+  events_volunteered: { type: Number, default: 0 },
+  event_attender_badges: [
+    {
+      name: { type: String, required: true },
+      level: { type: String, required: true },
+      locked: { type: Boolean, default: true },
+      image: { type: String, required: true },
+    },
+  ],
+  impact_investor_badges: [
+    {
+      name: { type: String, required: true },
+      level: { type: String, required: true },
+      locked: { type: Boolean, default: true },
+      image: { type: String, required: true },
+    },
+  ],
+  joinedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -7,7 +7,6 @@ const API_URL = "http://192.168.1.8:4000";
 
 export const fetchUserProfile = async () => {
   try {
-    console.log("hi");
     const token = await AsyncStorage.getItem("token");
     if (token) {
       const response = await axios.get(`${API_URL}/api/users/profile`, {
@@ -50,6 +49,21 @@ export const fetchPostsAndCampaigns = async () => {
     return { posts: [], campaigns: [] }; // Return empty arrays if no token
   } catch (error) {
     console.error("Error fetching posts and campaigns:", error);
+    throw error;
+  }
+};
+
+export const fetchRewardsData = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/api/users/rewards`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching rewards data:", error);
     throw error;
   }
 };

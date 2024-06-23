@@ -4,9 +4,74 @@ const User = require("../models/User.js");
 
 // Register a new user
 console.log("controller");
+const eventAttenderBadges = [
+  {
+    name: "Bronze Badge",
+    level: "Attended 3 Events",
+    locked: true,
+    image: "event_attender_1.png",
+  },
+  {
+    name: "Silver Badge",
+    level: "Attended 10 Events",
+    locked: true,
+    image: "event_attender_2.png",
+  },
+  {
+    name: "Golden Badge",
+    level: "Attended 25 Events",
+    locked: true,
+    image: "event_attender_3.png",
+  },
+  {
+    name: "Platinum Badge",
+    level: "Attended 50 Events",
+    locked: true,
+    image: "event_attender_4.png",
+  },
+  {
+    name: "Diamond Badge",
+    level: "Attended 100 Events",
+    locked: true,
+    image: "event_attender_5.png",
+  },
+];
+
+const impactInvestorBadges = [
+  {
+    name: "Impact Bronze Badge",
+    level: "Contributed $500",
+    locked: true,
+    image: "impact_investor_1.png",
+  },
+  {
+    name: "Impact Silver Badge",
+    level: "Contributed $1000",
+    locked: true,
+    image: "impact_investor_2.png",
+  },
+  {
+    name: "Impact Golden Badge",
+    level: "Contributed $5000",
+    locked: true,
+    image: "impact_investor_3.png",
+  },
+  {
+    name: "Impact Platinum Badge",
+    level: "Contributed $10000",
+    locked: true,
+    image: "impact_investor_4.png",
+  },
+  {
+    name: "Impact Diamond Badge",
+    level: "Contributed $50000",
+    locked: true,
+    image: "impact_investor_5.png",
+  },
+];
+
 exports.register = async (req, res) => {
   try {
-    console.log("hello");
     const {
       username,
       email,
@@ -17,9 +82,11 @@ exports.register = async (req, res) => {
       location,
       website,
     } = req.body;
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    // Create a new user
+
+    // Create a new user with rewards initialization
     const user = new User({
       username,
       email,
@@ -29,8 +96,14 @@ exports.register = async (req, res) => {
       profilePicture,
       location,
       website,
+      event_attender_badges: eventAttenderBadges,
+      impact_investor_badges: impactInvestorBadges,
     });
+
+    // Save the user to the database
     await user.save();
+
+    // Respond with success message
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("Error registering user:", error);

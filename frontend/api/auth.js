@@ -10,7 +10,7 @@ const useUserAPI = () => {
   const register = (userData) => {
     console.log(userData); // Log to indicate data being sent
     return axios
-      .post(`${API_URL}/api/users/register`, userData)
+      .post(`${API_URL}/api/auth/register`, userData)
       .then((response) => {
         console.log(response.data); // Log the response data
 
@@ -27,7 +27,7 @@ const useUserAPI = () => {
   const login = (userData) => {
     // Log to indicate data being sent
     return axios
-      .post(`${API_URL}/api/users/login`, userData)
+      .post(`${API_URL}/api/auth/login`, userData)
       .then((response) => {
         console.log("response.data", response.data);
         console.log("response.data.token", response.data.token);
@@ -47,7 +47,7 @@ const useUserAPI = () => {
 
   const checkLoginStatus = (token) => {
     return axios
-      .get(`${API_URL}/api/users/checkLoginStatus`, {
+      .get(`${API_URL}/api/auth/checkLoginStatus`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

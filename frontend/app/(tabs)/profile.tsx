@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
-import { fetchUserProfile } from "../../api/user.js";
+import { fetchUserProfile } from "../../api/user.js"; // Assuming this function fetches user profile data
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
@@ -18,27 +19,24 @@ const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await fetchUserProfile(); // Call the fetchUserDetails function
-        console.log("checking", userData);
+        const userData = await fetchUserProfile(); // Assuming this function fetches user profile data
         setLoading(false);
         setUserData(userData);
         if (userData != null) {
-          setAuthenticated(true); // Set authenticated to true if user data is fetched successfully
+          setAuthenticated(true);
         } else {
           setAuthenticated(false);
         }
       } catch (error) {
         console.error(error);
         setLoading(false);
-        // Check if the error is due to JWT expiration
         if (error.response && error.response.status === 401) {
-          // Remove the token from AsyncStorage
           await AsyncStorage.removeItem("token");
-          // Redirect to the login screen or perform any other action
           navigation.navigate("Login");
         }
       }
@@ -47,19 +45,31 @@ const ProfileScreen = () => {
     fetchUserData();
   }, []);
 
-  // Logout function
   const logout = async () => {
     try {
-      // Remove the token from AsyncStorage
       await AsyncStorage.removeItem("token");
-      // Redirect to the login screen
       navigation.navigate("Login");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
-  // Render loading indicator if data is still loading
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const userData = await fetchUserProfile();
+      setUserData(userData);
+      if (userData != null) {
+        setAuthenticated(true);
+      } else {
+        setAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("Error refreshing profile:", error);
+    }
+    setRefreshing(false);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -68,17 +78,19 @@ const ProfileScreen = () => {
     );
   }
 
-  // Render user profile once data is fetched and user is authenticated
   if (authenticated) {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Profile Picture */}
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <Image
-          source={{ uri: userData?.profilePicture || "jiojio" }}
+          source={{ uri: userData?.profilePicture || "" }}
           style={styles.profilePicture}
         />
 
-        {/* User Information */}
         <View style={styles.userInfoContainer}>
           <Text style={styles.userName}>{userData?.username || "Unknown"}</Text>
           <Text style={styles.userEmail}>{userData?.email || "Unknown"}</Text>
@@ -87,7 +99,6 @@ const ProfileScreen = () => {
           </Text>
         </View>
 
-        {/* Activity Summary */}
         <View style={styles.activitySummaryContainer}>
           <Text style={styles.activitySummaryTitle}>Activity Summary</Text>
           <View style={styles.activitySummaryItem}>
@@ -110,7 +121,6 @@ const ProfileScreen = () => {
           </View>
         </View>
 
-        {/* Edit Profile Button */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("EditProfile")}
@@ -118,13 +128,13 @@ const ProfileScreen = () => {
           <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
 
-        {/* View Rewards Button */}
         <TouchableOpacity
           style={styles.rewardsButton}
           onPress={() => navigation.navigate("RewardSection")}
         >
           <Text style={styles.rewardsButtonText}>My Rewards</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.rewardsButton}
           onPress={() => navigation.navigate("LeaderBoard")}
@@ -132,24 +142,20 @@ const ProfileScreen = () => {
           <Text style={styles.rewardsButtonText}>Leaderboard</Text>
         </TouchableOpacity>
 
-        {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <FontAwesome name="sign-out" size={24} color="black" />
         </TouchableOpacity>
       </ScrollView>
     );
   } else {
-    // Render create account button if user is not authenticated
     return (
       <View style={styles.container}>
-        {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
           onPress={() => navigation.navigate("CreateAccount")}
         >
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
-        {/* Create NGO Button */}
       </View>
     );
   }
