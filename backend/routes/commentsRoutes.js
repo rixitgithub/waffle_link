@@ -26,9 +26,9 @@ router.get("/:postId", async (req, res) => {
 });
 
 router.post("/create", authMiddleware, async (req, res) => {
-  const { postId, comment } = req.body;
+  const { postId, comment } = req.body; // Assuming commentText is the text content of the comment
   const userId = req.user.id;
-  console.log(postId, comment, userId);
+  console.log(postId, userId, comment);
   try {
     // Create a new comment instance
     const newComment = new Comment({
@@ -40,9 +40,18 @@ router.post("/create", authMiddleware, async (req, res) => {
     // Save the comment to the database
     await newComment.save();
 
-    res
-      .status(201)
-      .json({ message: "Comment created successfully", comment: newComment });
+    // Update the corresponding Post document's comments array
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { $push: { comments: newComment._id } },
+      { new: true, useFindAndModify: false }
+    );
+
+    res.status(201).json({
+      message: "Comment created successfully",
+      comment: newComment,
+      updatedPost, // Optional: Send updatedPost data back to the client
+    });
   } catch (error) {
     console.error("Error creating comment:", error);
     res.status(500).json({ message: "Failed to create comment" });

@@ -30,10 +30,12 @@ const postSchema = new Schema({
       ref: "User", // Reference to the User model
     },
   ],
-  comments: {
-    type: Schema.Types.ObjectId,
-    ref: "User", // Assuming a User model exists with 'User' as the model name
-  },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Comment", // Reference to the Comment model
+    },
+  ],
   ngoId: {
     type: Schema.Types.ObjectId,
     ref: "NGO", // Reference to the NGO model

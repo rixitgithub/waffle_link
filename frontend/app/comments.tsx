@@ -20,6 +20,7 @@ const Comments = () => {
   const postId = route.params ? route.params.postId : null;
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [refreshComments, setRefreshComments] = useState(false); // State variable to trigger comment refresh
 
@@ -32,6 +33,7 @@ const Comments = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching comments:", error);
+
         setLoading(false);
       }
     };

@@ -43,7 +43,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
   openUserDetails,
   userId,
 }) => {
-  console.log("item", item);
+  console.log("trial", item);
   const navigation = useNavigation(); // Initialize navigation
   const [upvoted, setUpvoted] = useState(item.upvotes.includes(userId));
   const [upvotes, setUpvotes] = useState(item.upvotes?.length ?? 0);
@@ -126,6 +126,35 @@ const PostComponent: React.FC<PostComponentProps> = ({
     });
   };
 
+  const formatTimeAgo = (createdAt) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+
+    const seconds = Math.floor((now - date) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+
+    if (interval > 1) {
+      return `${interval} years ago`;
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) {
+      return `${interval} months ago`;
+    }
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) {
+      return `${interval} days ago`;
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) {
+      return `${interval} hours ago`;
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+      return `${interval} minutes ago`;
+    }
+    return `${Math.floor(seconds)} seconds ago`;
+  };
+
   return (
     <View style={[styles.postContainer, { backgroundColor: colors.card }]}>
       <View style={styles.userContainer}>
@@ -148,7 +177,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
         </View>
         <View>
           <Text style={[styles.timeAgo, { color: colors.inactive }]}>
-            {item.createdAt} {/* Format as needed */}
+            {formatTimeAgo(item.createdAt)}
+            {/* Format as needed */}
           </Text>
         </View>
       </View>
