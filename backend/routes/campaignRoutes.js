@@ -182,6 +182,10 @@ router.post("/volunteer-request-action", authMiddleware, async (req, res) => {
       campaign.progress.volunteer.currentVolunteers += 1;
       // Remove user from volunteer_request
       campaign.progress.volunteer.volunteer_request.splice(requestIndex, 1);
+
+      await User.findByIdAndUpdate(userId, {
+        $inc: { events_volunteered: 1, score: 500 },
+      });
     } else if (actionType === "reject") {
       // Remove user from volunteer_request
       campaign.progress.volunteer.volunteer_request.splice(requestIndex, 1);
@@ -334,6 +338,8 @@ router.post("/campaign/donate", authMiddleware, async (req, res) => {
         .json({ message: "Campaign is not a fundraising type." });
     }
 
+    const donationAmount = parseFloat(amount);
+
     // Check if the user has already donated
     const existingDonor = campaign.progress.fundraising.donors.find(
       (donor) => donor.user.toString() === userId
@@ -341,17 +347,25 @@ router.post("/campaign/donate", authMiddleware, async (req, res) => {
 
     if (existingDonor) {
       // Update existing donor's amount
-      existingDonor.amount += parseFloat(amount);
+      existingDonor.amount += donationAmount;
     } else {
       // Add new donor details
       campaign.progress.fundraising.donors.push({
         user: userId,
-        amount: parseFloat(amount),
+        amount: donationAmount,
       });
     }
 
     // Update fundraising progress
-    campaign.progress.fundraising.currentAmount += parseFloat(amount);
+    campaign.progress.fundraising.currentAmount += donationAmount;
+
+    // Update user's money_donated and score
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        money_donated: donationAmount,
+        score: Math.floor(donationAmount / 100),
+      },
+    });
 
     await campaign.save();
 

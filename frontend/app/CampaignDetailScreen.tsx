@@ -213,7 +213,7 @@ const CampaignDetailScreen = () => {
                     <Text
                       style={[styles.donorDescription, { fontWeight: "bold" }]}
                     >
-                      Email
+                      Used For
                     </Text>
                     <Text
                       style={[
